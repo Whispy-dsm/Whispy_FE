@@ -1,0 +1,17 @@
+.notification-management {
+  animation: fadeIn 0.5s;
+}
+
+.notification-management .form-container {
+  max-width: 700px;
+}
+
+.data-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.data-inputs input {
+  width: 100%;
+}

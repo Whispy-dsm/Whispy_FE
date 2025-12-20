@@ -1,0 +1,135 @@
+.topic-management {
+  animation: fadeIn 0.5s;
+}
+
+.info-box {
+  background: #e7f3ff;
+  border-left: 4px solid #2196f3;
+  padding: 20px 24px;
+  border-radius: 12px;
+  margin-bottom: 32px;
+}
+
+.info-box h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1976d2;
+  margin-bottom: 12px;
+  letter-spacing: -0.4px;
+}
+
+.info-box p {
+  font-size: 15px;
+  font-weight: 500;
+  color: #4e5968;
+  line-height: 1.6;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.topic-management .form-container {
+  max-width: 600px;
+  margin-bottom: 40px;
+}
+
+.checkbox-group {
+  margin: 24px 0;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  margin-right: 12px;
+  margin-top: 3px;
+  width: auto;
+  cursor: pointer;
+}
+
+.checkbox-group span {
+  font-size: 15px;
+  font-weight: 600;
+  color: #191f28;
+  letter-spacing: -0.3px;
+}
+
+.help-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4e5968;
+  margin: 8px 0 0 28px;
+  line-height: 1.5;
+  letter-spacing: -0.2px;
+}
+
+.topics-list-section {
+  margin-top: 40px;
+}
+
+.topics-list-section h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #191f28;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.section-description {
+  font-size: 15px;
+  font-weight: 500;
+  color: #4e5968;
+  margin-bottom: 24px;
+  letter-spacing: -0.3px;
+}
+
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.topic-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f1f3f5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.topic-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.topic-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.topic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.topic-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #191f28;
+  letter-spacing: -0.3px;
+}
+
+.topic-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4e5968;
+  font-family: 'Courier New', monospace;
+  letter-spacing: -0.2px;
+}

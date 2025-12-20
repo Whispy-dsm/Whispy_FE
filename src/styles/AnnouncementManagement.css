@@ -1,0 +1,12 @@
+.announcement-management {
+  animation: fadeIn 0.5s;
+}
+
+.announcement-management .form-container {
+  max-width: 800px;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 150px;
+}
