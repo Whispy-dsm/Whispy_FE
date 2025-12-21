@@ -17,23 +17,6 @@ const toSnakeCase = (obj) => {
   }, {});
 };
 
-// Helper function to convert snake_case to camelCase
-const toCamelCase = (obj) => {
-  if (obj === null || obj === undefined || typeof obj !== 'object') {
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(toCamelCase);
-  }
-
-  return Object.keys(obj).reduce((acc, key) => {
-    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-    acc[camelKey] = toCamelCase(obj[key]);
-    return acc;
-  }, {});
-};
-
 // Authentication
 export const adminLogin = async (adminId, password) => {
   const response = await api.post('/admin/login', toSnakeCase({ adminId, password }));
