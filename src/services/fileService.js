@@ -13,7 +13,10 @@ export const uploadFile = async (file, folder) => {
 
   const response = await api.post('/files/upload', formData);
 
-  return response.data;
+  // 백엔드는 snake_case로 응답하므로 file_url을 fileUrl로 변환
+  return {
+    fileUrl: response.data.file_url
+  };
 };
 
 /**

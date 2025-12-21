@@ -27,9 +27,15 @@ export const AuthProvider = ({ children }) => {
       setUser({ adminId });
       return { success: true };
     } catch (error) {
+      // 백엔드 ErrorResponse: { message, status, timestamp, description, exception }
+      const errorMessage = error.response?.data?.message
+        || error.response?.data?.description
+        || error.message
+        || '로그인에 실패했습니다';
+
       return {
         success: false,
-        error: error.response?.data?.message || 'Login failed',
+        error: errorMessage,
       };
     }
   };

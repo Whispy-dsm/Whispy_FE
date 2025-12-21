@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { addNewTopic } from '../services/adminService';
+import Toast from '../components/Toast';
 import '../styles/TopicManagement.css';
 
 const TopicManagement = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [toast, setToast] = useState(null);
 
   const [formData, setFormData] = useState({
     topic: '',
@@ -34,7 +36,7 @@ const TopicManagement = () => {
 
     try {
       await addNewTopic(formData.topic, formData.defaultSubscribed);
-      setMessage({
+      setToast({
         type: 'success',
         text: `토픽 "${formData.topic}"이(가) 성공적으로 추가되었습니다!${formData.defaultSubscribed ? ' 모든 사용자가 구독되었습니다.' : ''}`,
       });
@@ -47,6 +49,13 @@ const TopicManagement = () => {
 
   return (
     <div className="topic-management">
+      {toast && (
+        <Toast
+          message={toast.text}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <h1 className="page-title">토픽 관리</h1>
 
       <div className="info-box">

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { sendNotification, sendTopicNotification, broadcastNotification } from '../services/adminService';
+import Toast from '../components/Toast';
 import '../styles/NotificationManagement.css';
 
 const NotificationManagement = () => {
   const [mode, setMode] = useState('device');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [toast, setToast] = useState(null);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -61,7 +63,7 @@ const NotificationManagement = () => {
         body: formData.body,
         data,
       });
-      setMessage({ type: 'success', text: '알림이 성공적으로 전송되었습니다!' });
+      setToast({ type: 'success', text: '알림이 성공적으로 전송되었습니다!' });
       resetForm();
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.message || '알림 전송 실패' });
@@ -86,7 +88,7 @@ const NotificationManagement = () => {
         body: formData.body,
         data,
       });
-      setMessage({ type: 'success', text: '토픽 알림이 성공적으로 전송되었습니다!' });
+      setToast({ type: 'success', text: '토픽 알림이 성공적으로 전송되었습니다!' });
       resetForm();
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.message || '토픽 알림 전송 실패' });
@@ -116,7 +118,7 @@ const NotificationManagement = () => {
         body: formData.body,
         data,
       });
-      setMessage({ type: 'success', text: '브로드캐스트 알림이 성공적으로 전송되었습니다!' });
+      setToast({ type: 'success', text: '브로드캐스트 알림이 성공적으로 전송되었습니다!' });
       resetForm();
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.message || '브로드캐스트 알림 전송 실패' });
@@ -127,6 +129,13 @@ const NotificationManagement = () => {
 
   return (
     <div className="notification-management">
+      {toast && (
+        <Toast
+          message={toast.text}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <h1 className="page-title">알림 관리</h1>
 
       <div className="mode-selector">

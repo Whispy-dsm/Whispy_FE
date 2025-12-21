@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getWithdrawalReasons, getWithdrawalReasonDetail, deleteWithdrawalReason } from '../services/adminService';
+import Toast from '../components/Toast';
 import '../styles/WithdrawalReasons.css';
 
 const WithdrawalReasons = () => {
@@ -7,6 +8,7 @@ const WithdrawalReasons = () => {
   const [selectedReason, setSelectedReason] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  const [toast, setToast] = useState(null);
   const [pagination, setPagination] = useState({
     page: 0,
     size: 10,
@@ -52,7 +54,7 @@ const WithdrawalReasons = () => {
 
     try {
       await deleteWithdrawalReason(id);
-      setMessage({ type: 'success', text: '탈퇴 사유가 성공적으로 삭제되었습니다!' });
+      setToast({ type: 'success', text: '탈퇴 사유가 성공적으로 삭제되었습니다!' });
       setSelectedReason(null);
       loadReasons();
     } catch (error) {
@@ -70,6 +72,13 @@ const WithdrawalReasons = () => {
 
   return (
     <div className="withdrawal-reasons">
+      {toast && (
+        <Toast
+          message={toast.text}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
       <h1 className="page-title">탈퇴 사유</h1>
 
       {message.text && (
