@@ -58,15 +58,26 @@ const AnnouncementManagement = () => {
     }
   };
 
-  const handleAnnouncementSelect = (announcement) => {
-    setSelectedAnnouncement(announcement);
-    setFormData({
-      id: announcement.id,
-      title: announcement.title,
-      content: announcement.content,
-      bannerImageUrl: announcement.bannerImageUrl || '',
-    });
-    setShowDetailModal(true);
+  const handleAnnouncementSelect = async (announcement) => {
+    setLoading(true);
+    try {
+      // 상세 정보 조회 API 호출
+      const detail = await getAnnouncementDetail(announcement.id);
+      const announcementDetail = { id: announcement.id, ...detail };
+
+      setSelectedAnnouncement(announcementDetail);
+      setFormData({
+        id: announcementDetail.id,
+        title: announcementDetail.title,
+        content: announcementDetail.content,
+        bannerImageUrl: announcementDetail.bannerImageUrl || '',
+      });
+      setShowDetailModal(true);
+    } catch (error) {
+      setMessage({ type: 'error', text: '공지사항 상세 정보 조회 실패' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -333,13 +344,23 @@ const AnnouncementManagement = () => {
               {selectedAnnouncement.bannerImageUrl && (
                 <div className="modal-detail-field">
                   <label>배너 이미지:</label>
-                  <img
-                    src={selectedAnnouncement.bannerImageUrl}
-                    alt="배너"
-                    className="modal-detail-image clickable"
-                    onClick={() => setImageViewerUrl(selectedAnnouncement.bannerImageUrl)}
-                    style={{ cursor: 'pointer' }}
-                  />
+                  <div>
+                    <img
+                      src={selectedAnnouncement.bannerImageUrl}
+                      alt="배너"
+                      className="modal-detail-image clickable"
+                      onClick={() => setImageViewerUrl(selectedAnnouncement.bannerImageUrl)}
+                      style={{ cursor: 'pointer', maxWidth: '200px', maxHeight: '200px', display: 'block', borderRadius: '8px' }}
+                    />
+                    <button
+                      type="button"
+                      className="view-image-btn"
+                      onClick={() => setImageViewerUrl(selectedAnnouncement.bannerImageUrl)}
+                      style={{ marginTop: '8px' }}
+                    >
+                      크게 보기
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
