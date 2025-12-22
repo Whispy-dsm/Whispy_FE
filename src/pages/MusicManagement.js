@@ -71,18 +71,29 @@ const MusicManagement = () => {
     }
   };
 
-  const handleMusicSelect = (music) => {
-    setSelectedMusic(music);
-    setFormData({
-      id: music.id,
-      title: music.title,
-      filePath: music.filePath || '',
-      duration: music.duration || '',
-      category: music.category || 'AMBIENT',
-      bannerImageUrl: music.bannerImageUrl || '',
-      videoUrl: music.videoUrl || '',
-    });
-    setShowDetailModal(true);
+  const handleMusicSelect = async (music) => {
+    setLoading(true);
+    try {
+      // 상세 정보 조회 API 호출
+      const detail = await getMusicDetail(music.id);
+      const musicDetail = { id: music.id, ...detail };
+
+      setSelectedMusic(musicDetail);
+      setFormData({
+        id: musicDetail.id,
+        title: musicDetail.title,
+        filePath: musicDetail.filePath || '',
+        duration: musicDetail.duration || '',
+        category: musicDetail.category || 'AMBIENT',
+        bannerImageUrl: musicDetail.bannerImageUrl || '',
+        videoUrl: musicDetail.videoUrl || '',
+      });
+      setShowDetailModal(true);
+    } catch (error) {
+      setMessage({ type: 'error', text: '음악 상세 정보 조회 실패' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInputChange = (e) => {
@@ -402,13 +413,23 @@ const MusicManagement = () => {
               {selectedMusic.bannerImageUrl && (
                 <div className="modal-detail-field">
                   <label>배너 이미지:</label>
-                  <img
-                    src={selectedMusic.bannerImageUrl}
-                    alt="배너"
-                    className="modal-detail-image clickable"
-                    onClick={() => setImageViewerUrl(selectedMusic.bannerImageUrl)}
-                    style={{ cursor: 'pointer' }}
-                  />
+                  <div>
+                    <img
+                      src={selectedMusic.bannerImageUrl}
+                      alt="배너"
+                      className="modal-detail-image clickable"
+                      onClick={() => setImageViewerUrl(selectedMusic.bannerImageUrl)}
+                      style={{ cursor: 'pointer', maxWidth: '200px', maxHeight: '200px', display: 'block', borderRadius: '8px' }}
+                    />
+                    <button
+                      type="button"
+                      className="view-image-btn"
+                      onClick={() => setImageViewerUrl(selectedMusic.bannerImageUrl)}
+                      style={{ marginTop: '8px' }}
+                    >
+                      크게 보기
+                    </button>
+                  </div>
                 </div>
               )}
               {selectedMusic.videoUrl && (
@@ -418,7 +439,7 @@ const MusicManagement = () => {
                     src={selectedMusic.videoUrl}
                     controls
                     className="modal-detail-video"
-                    style={{ maxWidth: '100%', maxHeight: '300px' }}
+                    style={{ maxWidth: '100%', maxHeight: '200px', display: 'block', borderRadius: '8px' }}
                   />
                 </div>
               )}
@@ -495,15 +516,23 @@ const MusicManagement = () => {
                   {uploadingFile && <span className="uploading-text">업로드 중...</span>}
                   {formData.filePath && (
                     <div className="file-preview">
-                      <span>✓ 업로드됨: {formData.filePath}</span>
-                      <button
-                        type="button"
-                        className="file-delete-btn"
-                        onClick={() => handleFileDelete('filePath')}
-                        disabled={loading || uploadingFile}
-                      >
-                        삭제
-                      </button>
+                      <audio
+                        src={formData.filePath}
+                        controls
+                        className="preview-audio"
+                        style={{ width: '100%', display: 'block', marginBottom: '8px' }}
+                      />
+                      <div className="file-preview-actions">
+                        <span>✓ 업로드됨</span>
+                        <button
+                          type="button"
+                          className="file-delete-btn"
+                          onClick={() => handleFileDelete('filePath')}
+                          disabled={loading || uploadingFile}
+                        >
+                          삭제
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -589,7 +618,7 @@ const MusicManagement = () => {
                         src={formData.videoUrl}
                         controls
                         className="preview-video"
-                        style={{ maxWidth: '100%', maxHeight: '300px' }}
+                        style={{ maxWidth: '100%', maxHeight: '300px', display: 'block', marginBottom: '8px' }}
                       />
                       <div className="file-preview-actions">
                         <span>✓ 업로드됨</span>
