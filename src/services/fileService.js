@@ -23,7 +23,6 @@ const convertHeicToJpg = async (file) => {
 
     return convertedFile;
   } catch (error) {
-    console.error('HEIC to JPG conversion failed:', error);
     throw error;
   }
 };

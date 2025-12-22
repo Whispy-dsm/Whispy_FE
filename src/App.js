@@ -28,9 +28,8 @@ function App() {
           method: "GET",
           mode: "no-cors",
         });
-        console.log("Health check sent:", new Date().toLocaleTimeString());
       } catch (error) {
-        console.error("Health check failed:", error);
+        // Health check failed silently
       }
     };
 
