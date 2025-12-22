@@ -388,6 +388,17 @@ const MusicManagement = () => {
                 <label>재생 시간:</label>
                 <span>{selectedMusic.duration}초</span>
               </div>
+              {selectedMusic.filePath && (
+                <div className="modal-detail-field">
+                  <label>음악 파일:</label>
+                  <audio
+                    src={selectedMusic.filePath}
+                    controls
+                    className="modal-detail-audio"
+                    style={{ width: '100%' }}
+                  />
+                </div>
+              )}
               {selectedMusic.bannerImageUrl && (
                 <div className="modal-detail-field">
                   <label>배너 이미지:</label>
@@ -397,6 +408,17 @@ const MusicManagement = () => {
                     className="modal-detail-image clickable"
                     onClick={() => setImageViewerUrl(selectedMusic.bannerImageUrl)}
                     style={{ cursor: 'pointer' }}
+                  />
+                </div>
+              )}
+              {selectedMusic.videoUrl && (
+                <div className="modal-detail-field">
+                  <label>비디오 파일:</label>
+                  <video
+                    src={selectedMusic.videoUrl}
+                    controls
+                    className="modal-detail-video"
+                    style={{ maxWidth: '100%', maxHeight: '300px' }}
                   />
                 </div>
               )}
@@ -563,15 +585,23 @@ const MusicManagement = () => {
                   {uploadingVideo && <span className="uploading-text">업로드 중...</span>}
                   {formData.videoUrl && (
                     <div className="file-preview">
-                      <span>✓ 업로드됨: {formData.videoUrl}</span>
-                      <button
-                        type="button"
-                        className="file-delete-btn"
-                        onClick={() => handleFileDelete('videoUrl')}
-                        disabled={loading || uploadingVideo}
-                      >
-                        삭제
-                      </button>
+                      <video
+                        src={formData.videoUrl}
+                        controls
+                        className="preview-video"
+                        style={{ maxWidth: '100%', maxHeight: '300px' }}
+                      />
+                      <div className="file-preview-actions">
+                        <span>✓ 업로드됨</span>
+                        <button
+                          type="button"
+                          className="file-delete-btn"
+                          onClick={() => handleFileDelete('videoUrl')}
+                          disabled={loading || uploadingVideo}
+                        >
+                          삭제
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
