@@ -1,16 +1,16 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import ProtectedRoute from './components/ProtectedRoute';
-import Layout from './components/Layout';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import MusicManagement from './pages/MusicManagement';
-import AnnouncementManagement from './pages/AnnouncementManagement';
-import NotificationManagement from './pages/NotificationManagement';
-import WithdrawalReasons from './pages/WithdrawalReasons';
-import TopicManagement from './pages/TopicManagement';
-import './App.css';
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./components/Layout";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import MusicManagement from "./pages/MusicManagement";
+import AnnouncementManagement from "./pages/AnnouncementManagement";
+import NotificationManagement from "./pages/NotificationManagement";
+import WithdrawalReasons from "./pages/WithdrawalReasons";
+import TopicManagement from "./pages/TopicManagement";
+import "./App.css";
 
 const HEALTH_CHECK_INTERVAL = 10000; // 10초
 
@@ -19,13 +19,13 @@ function App() {
     // 헬스체크 함수
     const performHealthCheck = async () => {
       try {
-        await fetch(`${process.env.REACT_APP_API_BASE_URL}/health`, {
-          method: 'GET',
-          mode: 'no-cors',
+        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/health`, {
+          method: "GET",
+          mode: "no-cors",
         });
-        console.log('Health check sent:', new Date().toLocaleTimeString());
+        console.log("Health check sent:", new Date().toLocaleTimeString());
       } catch (error) {
-        console.error('Health check failed:', error);
+        console.error("Health check failed:", error);
       }
     };
 
