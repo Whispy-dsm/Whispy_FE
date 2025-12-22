@@ -17,6 +17,23 @@ const toSnakeCase = (obj) => {
   }, {});
 };
 
+// Helper function to convert snake_case to camelCase
+const toCamelCase = (obj) => {
+  if (obj === null || obj === undefined || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(toCamelCase);
+  }
+
+  return Object.keys(obj).reduce((acc, key) => {
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    acc[camelKey] = toCamelCase(obj[key]);
+    return acc;
+  }, {});
+};
+
 // Authentication
 export const adminLogin = async (adminId, password) => {
   const response = await api.post('/admin/login', toSnakeCase({ adminId, password }));
@@ -34,19 +51,19 @@ export const getAllMusic = async (page = 0, size = 20, keyword = '') => {
   const response = await api.get('/search/music', {
     params: { keyword, page, size },
   });
-  return response.data;
+  return toCamelCase(response.data);
 };
 
 export const getMusicByCategory = async (category, page = 0, size = 20) => {
   const response = await api.get('/search/music/category', {
     params: { musicCategory: category, page, size },
   });
-  return response.data;
+  return toCamelCase(response.data);
 };
 
 export const getMusicDetail = async (id) => {
   const response = await api.get(`/search/${id}`);
-  return response.data;
+  return toCamelCase(response.data);
 };
 
 export const createMusic = async (musicData) => {
@@ -69,12 +86,12 @@ export const getAllAnnouncements = async (page = 0, size = 20) => {
   const response = await api.get('/announcements', {
     params: { page, size },
   });
-  return response.data;
+  return toCamelCase(response.data);
 };
 
 export const getAnnouncementDetail = async (id) => {
   const response = await api.get(`/announcements/${id}`);
-  return response.data;
+  return toCamelCase(response.data);
 };
 
 export const createAnnouncement = async (announcementData) => {
@@ -97,12 +114,12 @@ export const getWithdrawalReasons = async (page = 0, size = 10, sort = 'createdA
   const response = await api.get('/admin/withdrawal-reasons', {
     params: { page, size, sort },
   });
-  return response.data;
+  return toCamelCase(response.data);
 };
 
 export const getWithdrawalReasonDetail = async (id) => {
   const response = await api.get(`/admin/withdrawal-reasons/${id}`);
-  return response.data;
+  return toCamelCase(response.data);
 };
 
 export const deleteWithdrawalReason = async (id) => {
