@@ -155,6 +155,13 @@ const WithdrawalReasons = () => {
                 <span>{formatDate(selectedReason.createdAt)}</span>
               </div>
 
+              {selectedReason.detailContent && (
+                <div className="detail-field">
+                  <label>상세 내용:</label>
+                  <p className="detail-text">{selectedReason.detailContent}</p>
+                </div>
+              )}
+
               <button
                 className="delete-btn"
                 onClick={() => handleDelete(selectedReason.id)}
