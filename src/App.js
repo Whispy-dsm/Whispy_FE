@@ -19,7 +19,7 @@ function App() {
     // 헬스체크 함수
     const performHealthCheck = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/health`, {
+        await fetch(`${process.env.REACT_APP_API_BASE_URL}/health`, {
           method: "GET",
           mode: "no-cors",
         });
