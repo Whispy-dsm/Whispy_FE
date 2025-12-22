@@ -113,7 +113,7 @@ const NotificationManagement = () => {
         : {};
 
       await broadcastNotification({
-        topic: formData.topic,
+        topic: 'BROADCAST_ANNOUNCEMENT',
         title: formData.title,
         body: formData.body,
         data,
@@ -196,21 +196,23 @@ const NotificationManagement = () => {
             </>
           )}
 
-          <div className="form-group">
-            <label htmlFor="topic">토픽 *</label>
-            <select
-              id="topic"
-              name="topic"
-              value={formData.topic}
-              onChange={handleInputChange}
-              required
-              disabled={loading}
-            >
-              {topics.map((topic) => (
-                <option key={topic.value} value={topic.value}>{topic.label}</option>
-              ))}
-            </select>
-          </div>
+          {mode !== 'broadcast' && (
+            <div className="form-group">
+              <label htmlFor="topic">토픽 *</label>
+              <select
+                id="topic"
+                name="topic"
+                value={formData.topic}
+                onChange={handleInputChange}
+                required
+                disabled={loading}
+              >
+                {topics.map((topic) => (
+                  <option key={topic.value} value={topic.value}>{topic.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="title">제목 *</label>
