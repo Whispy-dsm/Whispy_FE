@@ -1,4 +1,32 @@
 import api from './api';
+import heic2any from 'heic2any';
+
+/**
+ * HEIC 파일을 JPG로 변환합니다
+ * @param {File} file - 변환할 HEIC 파일
+ * @returns {Promise<File>} - 변환된 JPG 파일
+ */
+const convertHeicToJpg = async (file) => {
+  try {
+    const convertedBlob = await heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.9
+    });
+
+    // Blob을 File 객체로 변환
+    const convertedFile = new File(
+      [convertedBlob],
+      file.name.replace(/\.heic$/i, '.jpg'),
+      { type: 'image/jpeg' }
+    );
+
+    return convertedFile;
+  } catch (error) {
+    console.error('HEIC to JPG conversion failed:', error);
+    throw error;
+  }
+};
 
 /**
  * 파일을 업로드하고 URL을 반환합니다
@@ -7,8 +35,15 @@ import api from './api';
  * @returns {Promise<{fileUrl: string}>}
  */
 export const uploadFile = async (file, folder) => {
+  let fileToUpload = file;
+
+  // HEIC 파일인 경우 JPG로 변환
+  if (file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic')) {
+    fileToUpload = await convertHeicToJpg(file);
+  }
+
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', fileToUpload);
   formData.append('folder', folder);
 
   const response = await api.post('/files/upload', formData);
