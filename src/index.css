@@ -11,8 +11,9 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f9fafb;
-  letter-spacing: -0.3px;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  letter-spacing: -0.01em;
 }
 
 code {
@@ -20,21 +21,21 @@ code {
     monospace;
 }
 
-/* Toss UI 스타일 */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  letter-spacing: -0.5px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #1a1a1a;
 }
 
 button {
-  font-weight: 600;
-  letter-spacing: -0.3px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
