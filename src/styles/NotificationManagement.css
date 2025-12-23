@@ -1,3 +1,5 @@
+@import './Common.css';
+
 .notification-management {
   animation: fadeIn 0.5s;
 }
@@ -6,12 +8,75 @@
   max-width: 700px;
 }
 
-.data-inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+.data-field-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
 }
 
-.data-inputs input {
-  width: 100%;
+.data-field-row input {
+  flex: 1;
+}
+
+.remove-field-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  color: #dc2626;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.remove-field-btn:hover:not(:disabled) {
+  background: #fef2f2;
+  border-color: #dc2626;
+}
+
+.remove-field-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.add-field-btn {
+  margin-top: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1a1a;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.add-field-btn:hover:not(:disabled) {
+  background: #fafafa;
+  border-color: #1a1a1a;
+}
+
+.add-field-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

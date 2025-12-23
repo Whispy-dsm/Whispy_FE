@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { sendNotification, sendTopicNotification, broadcastNotification } from '../services/adminService';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import '../styles/NotificationManagement.css';
 
 const NotificationManagement = () => {
@@ -8,6 +9,7 @@ const NotificationManagement = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [toast, setToast] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
   const [formData, setFormData] = useState({
     email: '',
@@ -15,9 +17,9 @@ const NotificationManagement = () => {
     topic: 'GENERAL_ANNOUNCEMENT',
     title: '',
     body: '',
-    dataKey: '',
-    dataValue: '',
   });
+
+  const [dataFields, setDataFields] = useState([{ key: '', value: '' }]);
 
   const topics = [
     { value: 'GENERAL_ANNOUNCEMENT', label: '일반 공지사항' },
@@ -31,6 +33,23 @@ const NotificationManagement = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleDataFieldChange = (index, field, value) => {
+    const newDataFields = [...dataFields];
+    newDataFields[index][field] = value;
+    setDataFields(newDataFields);
+  };
+
+  const addDataField = () => {
+    setDataFields([...dataFields, { key: '', value: '' }]);
+  };
+
+  const removeDataField = (index) => {
+    if (dataFields.length > 1) {
+      const newDataFields = dataFields.filter((_, i) => i !== index);
+      setDataFields(newDataFields);
+    }
+  };
+
   const resetForm = () => {
     setFormData({
       email: '',
@@ -38,10 +57,19 @@ const NotificationManagement = () => {
       topic: 'GENERAL_ANNOUNCEMENT',
       title: '',
       body: '',
-      dataKey: '',
-      dataValue: '',
     });
+    setDataFields([{ key: '', value: '' }]);
     setMessage({ type: '', text: '' });
+  };
+
+  const buildDataObject = () => {
+    const data = {};
+    dataFields.forEach(field => {
+      if (field.key && field.value) {
+        data[field.key] = field.value;
+      }
+    });
+    return data;
   };
 
   const handleDeviceNotification = async (e) => {
@@ -51,9 +79,7 @@ const NotificationManagement = () => {
 
     try {
       const tokens = formData.deviceTokens.split(',').map(t => t.trim()).filter(t => t);
-      const data = formData.dataKey && formData.dataValue
-        ? { [formData.dataKey]: formData.dataValue }
-        : {};
+      const data = buildDataObject();
 
       await sendNotification({
         email: formData.email,
@@ -78,9 +104,7 @@ const NotificationManagement = () => {
     setMessage({ type: '', text: '' });
 
     try {
-      const data = formData.dataKey && formData.dataValue
-        ? { [formData.dataKey]: formData.dataValue }
-        : {};
+      const data = buildDataObject();
 
       await sendTopicNotification({
         topic: formData.topic,
@@ -99,32 +123,36 @@ const NotificationManagement = () => {
 
   const handleBroadcast = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage({ type: '', text: '' });
 
-    if (!window.confirm('정말 모든 사용자에게 알림을 전송하시겠습니까?')) {
-      setLoading(false);
-      return;
-    }
+    const confirmBroadcast = async () => {
+      setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null });
+      setLoading(true);
+      setMessage({ type: '', text: '' });
 
-    try {
-      const data = formData.dataKey && formData.dataValue
-        ? { [formData.dataKey]: formData.dataValue }
-        : {};
+      try {
+        const data = buildDataObject();
 
-      await broadcastNotification({
-        topic: 'BROADCAST_ANNOUNCEMENT',
-        title: formData.title,
-        body: formData.body,
-        data,
-      });
-      setToast({ type: 'success', text: '브로드캐스트 알림이 성공적으로 전송되었습니다!' });
-      resetForm();
-    } catch (error) {
-      setMessage({ type: 'error', text: error.response?.data?.message || '브로드캐스트 알림 전송 실패' });
-    } finally {
-      setLoading(false);
-    }
+        await broadcastNotification({
+          topic: 'BROADCAST_ANNOUNCEMENT',
+          title: formData.title,
+          body: formData.body,
+          data,
+        });
+        setToast({ type: 'success', text: '브로드캐스트 알림이 성공적으로 전송되었습니다!' });
+        resetForm();
+      } catch (error) {
+        setMessage({ type: 'error', text: error.response?.data?.message || '브로드캐스트 알림 전송 실패' });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: '브로드캐스트 확인',
+      message: '정말 모든 사용자에게 알림을 전송하시겠습니까?',
+      onConfirm: confirmBroadcast,
+    });
   };
 
   return (
@@ -136,6 +164,16 @@ const NotificationManagement = () => {
           onClose={() => setToast(null)}
         />
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null })}
+        danger={false}
+      />
+
       <h1 className="page-title">알림 관리</h1>
 
       <div className="mode-selector">
@@ -246,24 +284,42 @@ const NotificationManagement = () => {
 
           <div className="form-group">
             <label>추가 데이터 (선택)</label>
-            <div className="data-inputs">
-              <input
-                type="text"
-                name="dataKey"
-                value={formData.dataKey}
-                onChange={handleInputChange}
-                placeholder="키"
-                disabled={loading}
-              />
-              <input
-                type="text"
-                name="dataValue"
-                value={formData.dataValue}
-                onChange={handleInputChange}
-                placeholder="값"
-                disabled={loading}
-              />
-            </div>
+            {dataFields.map((field, index) => (
+              <div key={index} className="data-field-row">
+                <input
+                  type="text"
+                  value={field.key}
+                  onChange={(e) => handleDataFieldChange(index, 'key', e.target.value)}
+                  placeholder="키"
+                  disabled={loading}
+                />
+                <input
+                  type="text"
+                  value={field.value}
+                  onChange={(e) => handleDataFieldChange(index, 'value', e.target.value)}
+                  placeholder="값"
+                  disabled={loading}
+                />
+                {dataFields.length > 1 && (
+                  <button
+                    type="button"
+                    className="remove-field-btn"
+                    onClick={() => removeDataField(index)}
+                    disabled={loading}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              className="add-field-btn"
+              onClick={addDataField}
+              disabled={loading}
+            >
+              + 데이터 추가
+            </button>
           </div>
 
           {message.text && (
