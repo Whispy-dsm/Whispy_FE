@@ -15,19 +15,22 @@ const Layout = ({ children }) => {
   };
 
   const menuItems = [
-    { path: '/admin', label: '대시보드', icon: '📊' },
-    { path: '/admin/music', label: '음악 관리', icon: '🎵' },
-    { path: '/admin/announcements', label: '공지사항', icon: '📢' },
-    { path: '/admin/notifications', label: '알림 발송', icon: '🔔' },
-    { path: '/admin/topics', label: '토픽 관리', icon: '🏷️' },
-    { path: '/admin/withdrawal-reasons', label: '탈퇴 사유', icon: '📋' },
+    { path: '/admin', label: '대시보드', icon: '□' },
+    { path: '/admin/music', label: '음악 관리', icon: '♪' },
+    { path: '/admin/announcements', label: '공지사항', icon: '!' },
+    { path: '/admin/notifications', label: '알림 발송', icon: '○' },
+    { path: '/admin/topics', label: '토픽 관리', icon: '#' },
+    { path: '/admin/withdrawal-reasons', label: '탈퇴 사유', icon: '⋯' },
   ];
 
   return (
     <div className="layout">
       <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-header">
-          <h2>Whispy Admin</h2>
+          <div className="logo-container">
+            <img src="/logo.svg" alt="Whispy" className="logo" />
+            {sidebarOpen && <h2>Whispy Admin</h2>}
+          </div>
           <button className="toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? '←' : '→'}
           </button>
@@ -48,7 +51,6 @@ const Layout = ({ children }) => {
 
         <div className="sidebar-footer">
           <button onClick={handleLogout} className="logout-btn">
-            <span className="nav-icon">🚪</span>
             {sidebarOpen && <span>로그아웃</span>}
           </button>
         </div>
