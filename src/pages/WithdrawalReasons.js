@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getWithdrawalReasons, getWithdrawalReasonDetail, deleteWithdrawalReason } from '../services/adminService';
 import Toast from '../components/Toast';
+import ConfirmModal from '../components/ConfirmModal';
 import '../styles/WithdrawalReasons.css';
 
 const WithdrawalReasons = () => {
@@ -9,6 +10,7 @@ const WithdrawalReasons = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [toast, setToast] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
   const [pagination, setPagination] = useState({
     page: 0,
     size: 10,
@@ -48,18 +50,25 @@ const WithdrawalReasons = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('정말 이 탈퇴 사유를 삭제하시겠습니까?')) {
-      return;
-    }
+    const confirmDelete = async () => {
+      setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null });
 
-    try {
-      await deleteWithdrawalReason(id);
-      setToast({ type: 'success', text: '탈퇴 사유가 성공적으로 삭제되었습니다!' });
-      setSelectedReason(null);
-      loadReasons();
-    } catch (error) {
-      setMessage({ type: 'error', text: '탈퇴 사유 삭제 실패' });
-    }
+      try {
+        await deleteWithdrawalReason(id);
+        setToast({ type: 'success', text: '탈퇴 사유가 성공적으로 삭제되었습니다!' });
+        setSelectedReason(null);
+        loadReasons();
+      } catch (error) {
+        setMessage({ type: 'error', text: '탈퇴 사유 삭제 실패' });
+      }
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: '삭제 확인',
+      message: '정말 이 탈퇴 사유를 삭제하시겠습니까?',
+      onConfirm: confirmDelete,
+    });
   };
 
   const handlePageChange = (newPage) => {
@@ -79,6 +88,16 @@ const WithdrawalReasons = () => {
           onClose={() => setToast(null)}
         />
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null })}
+        danger={true}
+      />
+
       <h1 className="page-title">탈퇴 사유</h1>
 
       {message.text && (

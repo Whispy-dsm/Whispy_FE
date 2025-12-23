@@ -3,6 +3,7 @@ import { getAllMusic, getMusicByCategory, getMusicDetail, createMusic, updateMus
 import { uploadFile, deleteFile, FILE_FOLDERS } from '../services/fileService';
 import Toast from '../components/Toast';
 import Modal from '../components/Modal';
+import ConfirmModal from '../components/ConfirmModal';
 import '../styles/MusicManagement.css';
 
 const MusicManagement = () => {
@@ -21,6 +22,7 @@ const MusicManagement = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [toast, setToast] = useState(null);
   const [imageViewerUrl, setImageViewerUrl] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
   const [formData, setFormData] = useState({
     id: '',
@@ -151,31 +153,37 @@ const MusicManagement = () => {
     const existingUrl = formData[field];
     if (!existingUrl) return;
 
-    if (!window.confirm('이 파일을 삭제하시겠습니까?')) {
-      return;
-    }
-
     const setUploadingState = field === 'filePath' ? setUploadingFile :
                               field === 'bannerImageUrl' ? setUploadingBanner :
                               setUploadingVideo;
 
-    setUploadingState(true);
-    setMessage({ type: '', text: '' });
+    const confirmDelete = async () => {
+      setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null });
+      setUploadingState(true);
+      setMessage({ type: '', text: '' });
 
-    try {
-      // URL에서 파일명 추출 (쿼리 파라미터 제거)
-      const urlWithoutParams = existingUrl.split('?')[0];
-      const fileName = urlWithoutParams.split('/').pop();
-      await deleteFile(folder, fileName);
+      try {
+        // URL에서 파일명 추출 (쿼리 파라미터 제거)
+        const urlWithoutParams = existingUrl.split('?')[0];
+        const fileName = urlWithoutParams.split('/').pop();
+        await deleteFile(folder, fileName);
 
-      // 폼 데이터에서 URL 제거 (함수형 업데이트)
-      setFormData(prev => ({ ...prev, [field]: '' }));
-      setToast({ type: 'success', text: '파일이 삭제되었습니다' });
-    } catch (error) {
-      setMessage({ type: 'error', text: error.response?.data?.message || '파일 삭제 실패' });
-    } finally {
-      setUploadingState(false);
-    }
+        // 폼 데이터에서 URL 제거 (함수형 업데이트)
+        setFormData(prev => ({ ...prev, [field]: '' }));
+        setToast({ type: 'success', text: '파일이 삭제되었습니다' });
+      } catch (error) {
+        setMessage({ type: 'error', text: error.response?.data?.message || '파일 삭제 실패' });
+      } finally {
+        setUploadingState(false);
+      }
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: '삭제 확인',
+      message: '이 파일을 삭제하시겠습니까?',
+      onConfirm: confirmDelete,
+    });
   };
 
   const resetForm = () => {
@@ -241,24 +249,30 @@ const MusicManagement = () => {
 
   const handleDelete = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setMessage({ type: '', text: '' });
 
-    if (!window.confirm('정말 이 음악을 삭제하시겠습니까?')) {
-      setLoading(false);
-      return;
-    }
+    const confirmDelete = async () => {
+      setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null });
+      setLoading(true);
+      setMessage({ type: '', text: '' });
 
-    try {
-      await deleteMusic(parseInt(formData.id));
-      setToast({ type: 'success', text: '음악이 성공적으로 삭제되었습니다!' });
-      resetForm();
-      setMusicList(musicList.filter(m => m.id !== parseInt(formData.id)));
-    } catch (error) {
-      setMessage({ type: 'error', text: error.response?.data?.message || '음악 삭제 실패' });
-    } finally {
-      setLoading(false);
-    }
+      try {
+        await deleteMusic(parseInt(formData.id));
+        setToast({ type: 'success', text: '음악이 성공적으로 삭제되었습니다!' });
+        resetForm();
+        setMusicList(musicList.filter(m => m.id !== parseInt(formData.id)));
+      } catch (error) {
+        setMessage({ type: 'error', text: error.response?.data?.message || '음악 삭제 실패' });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    setConfirmModal({
+      isOpen: true,
+      title: '삭제 확인',
+      message: '정말 이 음악을 삭제하시겠습니까?',
+      onConfirm: confirmDelete,
+    });
   };
 
   return (
@@ -270,6 +284,15 @@ const MusicManagement = () => {
           onClose={() => setToast(null)}
         />
       )}
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null })}
+        danger={true}
+      />
 
       {/* 이미지 뷰어 모달 */}
       <Modal
