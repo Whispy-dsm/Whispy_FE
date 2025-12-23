@@ -14,9 +14,14 @@ const api = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // 로그인 및 리프레시 요청에는 토큰을 추가하지 않음
+    const isAuthRequest = config.url?.includes('/admin/login') || config.url?.includes('/admin/refresh');
+
+    if (!isAuthRequest) {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
 
     // FormData일 때는 Content-Type을 자동으로 설정하도록 삭제
