@@ -9,7 +9,7 @@
 
 .login-box {
   background: white;
-  padding: 40px;
+  padding: 30px;
   border-radius: 8px;
   border: 1px solid #e5e5e5;
   width: 100%;
@@ -45,7 +45,7 @@
 
 .form-group label {
   display: block;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: #1a1a1a;
   margin-bottom: 6px;
