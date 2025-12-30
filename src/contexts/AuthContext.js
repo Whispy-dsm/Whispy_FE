@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { adminLogin } from '../services/adminService';
+import { adminLogin, adminLogout } from '../services/adminService';
 
 const AuthContext = createContext(null);
 
@@ -40,11 +40,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    setIsAuthenticated(false);
-    setUser(null);
+  const logout = async () => {
+    try {
+      await adminLogout();
+    } catch (error) {
+      console.error('로그아웃 API 호출 실패:', error);
+    } finally {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      setIsAuthenticated(false);
+      setUser(null);
+    }
   };
 
   return (

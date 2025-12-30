@@ -40,6 +40,10 @@ export const adminLogin = async (adminId, password) => {
   return response.data;
 };
 
+export const adminLogout = async () => {
+  await api.post('/admin/logout');
+};
+
 // Topics
 export const addNewTopic = async (topic, defaultSubscribed) => {
   const response = await api.post('/admin/topics/add', toSnakeCase({ topic, defaultSubscribed }));
