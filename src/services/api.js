@@ -50,12 +50,19 @@ api.interceptors.response.use(
       if (refreshToken) {
         try {
           // Try to refresh the token
-          const response = await axios.post(`${API_BASE_URL}/admin/refresh`, {
-            refresh_token: refreshToken,
+          const response = await axios.put(`${API_BASE_URL}/users/reissue`, null, {
+            headers: {
+              'X-Refresh-Token': refreshToken,
+            },
           });
 
           const accessToken = response.data.access_token;
           localStorage.setItem('accessToken', accessToken);
+
+          // Update refresh token if backend returns new one
+          if (response.data.refresh_token) {
+            localStorage.setItem('refreshToken', response.data.refresh_token);
+          }
 
           // Retry the original request
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
