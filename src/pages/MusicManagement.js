@@ -24,6 +24,13 @@ const MusicManagement = () => {
   const [imageViewerUrl, setImageViewerUrl] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
+  // 생성 모드에서 업로드된 파일 URL 추적 (취소 시 삭제용)
+  const [uploadedFiles, setUploadedFiles] = useState({
+    filePath: null,
+    bannerImageUrl: null,
+    videoUrl: null,
+  });
+
   const [formData, setFormData] = useState({
     id: '',
     title: '',
@@ -137,6 +144,12 @@ const MusicManagement = () => {
 
       // formData 상태를 함수형 업데이트로 변경
       setFormData(prev => ({ ...prev, [field]: response.fileUrl }));
+
+      // create 모드일 때만 업로드된 파일 추적 (취소 시 삭제용)
+      if (action === 'create') {
+        setUploadedFiles(prev => ({ ...prev, [field]: response.fileUrl }));
+      }
+
       setToast({ type: 'success', text: `파일 업로드 성공: ${file.name}` });
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.message || '파일 업로드 실패' });
@@ -186,7 +199,35 @@ const MusicManagement = () => {
     });
   };
 
-  const resetForm = () => {
+  const resetForm = async () => {
+    // create 모드에서 업로드한 파일들을 서버에서 삭제
+    if (action === 'create') {
+      const filesToDelete = [];
+
+      if (uploadedFiles.filePath) {
+        filesToDelete.push({ url: uploadedFiles.filePath, folder: FILE_FOLDERS.MUSIC });
+      }
+      if (uploadedFiles.bannerImageUrl) {
+        filesToDelete.push({ url: uploadedFiles.bannerImageUrl, folder: FILE_FOLDERS.MUSIC_BANNER });
+      }
+      if (uploadedFiles.videoUrl) {
+        filesToDelete.push({ url: uploadedFiles.videoUrl, folder: FILE_FOLDERS.MUSIC_VIDEO });
+      }
+
+      // 파일 삭제 요청 (병렬 처리)
+      await Promise.allSettled(
+        filesToDelete.map(async ({ url, folder }) => {
+          try {
+            const urlWithoutParams = url.split('?')[0];
+            const fileName = urlWithoutParams.split('/').pop();
+            await deleteFile(folder, fileName);
+          } catch (error) {
+            console.error('파일 삭제 실패:', error);
+          }
+        })
+      );
+    }
+
     setFormData({
       id: '',
       title: '',
@@ -195,6 +236,11 @@ const MusicManagement = () => {
       category: 'AMBIENT',
       bannerImageUrl: '',
       videoUrl: '',
+    });
+    setUploadedFiles({
+      filePath: null,
+      bannerImageUrl: null,
+      videoUrl: null,
     });
     setSelectedMusic(null);
     setShowDetailModal(false);
@@ -219,7 +265,26 @@ const MusicManagement = () => {
         duration: parseInt(createData.duration),
       });
       setToast({ type: 'success', text: '음악이 성공적으로 생성되었습니다!' });
-      resetForm();
+
+      // 성공 시에는 uploadedFiles 초기화만 (파일 삭제 안 함)
+      setUploadedFiles({
+        filePath: null,
+        bannerImageUrl: null,
+        videoUrl: null,
+      });
+      setFormData({
+        id: '',
+        title: '',
+        filePath: '',
+        duration: '',
+        category: 'AMBIENT',
+        bannerImageUrl: '',
+        videoUrl: '',
+      });
+      setSelectedMusic(null);
+      setShowDetailModal(false);
+      setAction(null);
+      setMessage({ type: '', text: '' });
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.message || '음악 생성 실패' });
     } finally {

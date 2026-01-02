@@ -21,6 +21,9 @@ const AnnouncementManagement = () => {
   const [imageViewerUrl, setImageViewerUrl] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
+  // 생성 모드에서 업로드된 파일 URL 추적 (취소 시 삭제용)
+  const [uploadedBannerUrl, setUploadedBannerUrl] = useState(null);
+
   const [formData, setFormData] = useState({
     id: '',
     title: '',
@@ -113,6 +116,12 @@ const AnnouncementManagement = () => {
 
       // formData 상태를 함수형 업데이트로 변경
       setFormData(prev => ({ ...prev, bannerImageUrl: response.fileUrl }));
+
+      // create 모드일 때만 업로드된 파일 추적 (취소 시 삭제용)
+      if (action === 'create') {
+        setUploadedBannerUrl(response.fileUrl);
+      }
+
       setToast({ type: 'success', text: `배너 이미지 업로드 성공: ${file.name}` });
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.message || '배너 이미지 업로드 실패' });
@@ -153,13 +162,25 @@ const AnnouncementManagement = () => {
     });
   };
 
-  const resetForm = () => {
+  const resetForm = async () => {
+    // create 모드에서 업로드한 배너를 서버에서 삭제
+    if (action === 'create' && uploadedBannerUrl) {
+      try {
+        const urlWithoutParams = uploadedBannerUrl.split('?')[0];
+        const fileName = urlWithoutParams.split('/').pop();
+        await deleteFile(FILE_FOLDERS.ANNOUNCEMENT_BANNER, fileName);
+      } catch (error) {
+        console.error('배너 삭제 실패:', error);
+      }
+    }
+
     setFormData({
       id: '',
       title: '',
       content: '',
       bannerImageUrl: '',
     });
+    setUploadedBannerUrl(null);
     setSelectedAnnouncement(null);
     setShowDetailModal(false);
     setAction(null);
@@ -180,7 +201,19 @@ const AnnouncementManagement = () => {
       const { id, ...createData } = formData;
       await createAnnouncement(createData);
       setToast({ type: 'success', text: '공지사항이 성공적으로 생성되었습니다!' });
-      resetForm();
+
+      // 성공 시에는 uploadedBannerUrl 초기화만 (파일 삭제 안 함)
+      setUploadedBannerUrl(null);
+      setFormData({
+        id: '',
+        title: '',
+        content: '',
+        bannerImageUrl: '',
+      });
+      setSelectedAnnouncement(null);
+      setShowDetailModal(false);
+      setAction(null);
+      setMessage({ type: '', text: '' });
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.message || '공지사항 생성 실패' });
     } finally {
