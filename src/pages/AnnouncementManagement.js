@@ -94,6 +94,14 @@ const AnnouncementManagement = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // 파일 크기 검증 (5MB = 5 * 1024 * 1024 bytes)
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      setMessage({ type: 'error', text: '5MB 이상 파일은 업로드할 수 없습니다.' });
+      e.target.value = ''; // 파일 input 초기화
+      return;
+    }
+
     setUploadingBanner(true);
     setMessage({ type: '', text: '' });
 

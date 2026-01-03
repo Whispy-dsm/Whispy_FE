@@ -114,6 +114,19 @@ const MusicManagement = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // 파일 크기 검증 (음원 파일: 50MB, 이미지/비디오: 5MB)
+    const MAX_MUSIC_SIZE = 50 * 1024 * 1024; // 50MB
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;   // 5MB
+
+    const maxSize = field === 'filePath' ? MAX_MUSIC_SIZE : MAX_FILE_SIZE;
+    const sizeLabel = field === 'filePath' ? '50MB' : '5MB';
+
+    if (file.size > maxSize) {
+      setMessage({ type: 'error', text: `${sizeLabel} 이상 파일은 업로드할 수 없습니다.` });
+      e.target.value = ''; // 파일 input 초기화
+      return;
+    }
+
     const setUploadingState = field === 'filePath' ? setUploadingFile :
                               field === 'bannerImageUrl' ? setUploadingBanner :
                               setUploadingVideo;
