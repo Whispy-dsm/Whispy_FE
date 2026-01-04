@@ -181,20 +181,44 @@
   margin: 0 auto;
 }
 
+/* 모바일 반응형 */
 @media (max-width: 768px) {
-  .sidebar.open {
-    width: 100%;
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 1000;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
   }
 
-  .main-content.sidebar-open {
-    margin-left: 0;
+  .sidebar.open {
+    width: 280px;
   }
 
   .sidebar.closed {
     width: 0;
+    border-right: none;
   }
 
-  .main-content.sidebar-closed {
-    margin-left: 0;
+  .main-content {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+
+  .content-wrapper {
+    padding: 16px;
+  }
+
+  /* 사이드바 열릴 때 오버레이 */
+  .sidebar.open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 280px;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: -1;
   }
 }

@@ -353,3 +353,92 @@
   color: #a3a3a3;
   font-size: 14px;
 }
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 20px;
+  }
+
+  .action-bar {
+    margin-bottom: 20px;
+  }
+
+  .create-btn {
+    font-size: 13px;
+    padding: 10px 16px;
+  }
+
+  .search-section h2 {
+    font-size: 16px;
+  }
+
+  .search-controls {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .search-type-select,
+  .category-select,
+  .search-input {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .search-btn {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .results-list h3 {
+    font-size: 14px;
+  }
+
+  .list-item {
+    padding: 12px;
+  }
+
+  .item-title {
+    font-size: 14px;
+  }
+
+  .item-meta {
+    font-size: 12px;
+  }
+
+  .form-group label {
+    font-size: 12px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .submit-btn,
+  .cancel-btn {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .file-preview {
+    margin-top: 8px;
+  }
+
+  .preview-image,
+  .preview-video {
+    max-height: 200px;
+  }
+
+  .message {
+    font-size: 12px;
+    padding: 10px;
+  }
+}
