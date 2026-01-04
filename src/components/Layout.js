@@ -4,10 +4,16 @@ import { useAuth } from '../contexts/AuthContext';
 import '../styles/Layout.css';
 
 const Layout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
+
+  const handleMenuClick = () => {
+    if (window.innerWidth <= 768) {
+      setSidebarOpen(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -25,6 +31,11 @@ const Layout = ({ children }) => {
 
   return (
     <div className="layout">
+      {/* 모바일 오버레이 */}
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
+
       <aside className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="sidebar-header">
           <div className="logo-container">
@@ -42,6 +53,7 @@ const Layout = ({ children }) => {
               key={item.path}
               to={item.path}
               className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
+              onClick={handleMenuClick}
             >
               <span className="nav-icon">{item.icon}</span>
               {sidebarOpen && <span className="nav-label">{item.label}</span>}
@@ -57,6 +69,14 @@ const Layout = ({ children }) => {
       </aside>
 
       <main className={`main-content ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
+        {/* 모바일 헤더 */}
+        <div className="mobile-header">
+          <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)}>
+            ☰
+          </button>
+          <h1 className="mobile-title">Whispy Admin</h1>
+        </div>
+
         <div className="content-wrapper">
           {children}
         </div>
