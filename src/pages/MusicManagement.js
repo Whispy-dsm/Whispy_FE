@@ -34,6 +34,8 @@ const MusicManagement = () => {
   const [formData, setFormData] = useState({
     id: '',
     title: '',
+    artist: '',
+    description: '',
     filePath: '',
     duration: '',
     category: 'AMBIENT',
@@ -91,6 +93,8 @@ const MusicManagement = () => {
       setFormData({
         id: musicDetail.id,
         title: musicDetail.title,
+        artist: musicDetail.artist || '',
+        description: musicDetail.description || '',
         filePath: musicDetail.filePath || '',
         duration: musicDetail.duration || '',
         category: musicDetail.category || 'AMBIENT',
@@ -244,6 +248,8 @@ const MusicManagement = () => {
     setFormData({
       id: '',
       title: '',
+      artist: '',
+      description: '',
       filePath: '',
       duration: '',
       category: 'AMBIENT',
@@ -288,6 +294,8 @@ const MusicManagement = () => {
       setFormData({
         id: '',
         title: '',
+        artist: '',
+        description: '',
         filePath: '',
         duration: '',
         category: 'AMBIENT',
@@ -394,6 +402,8 @@ const MusicManagement = () => {
             setFormData({
               id: '',
               title: '',
+              artist: '',
+              description: '',
               filePath: '',
               duration: '',
               category: 'AMBIENT',
@@ -492,6 +502,18 @@ const MusicManagement = () => {
                 <label>제목:</label>
                 <span>{selectedMusic.title}</span>
               </div>
+              {selectedMusic.artist && (
+                <div className="modal-detail-field">
+                  <label>아티스트:</label>
+                  <span>{selectedMusic.artist}</span>
+                </div>
+              )}
+              {selectedMusic.description && (
+                <div className="modal-detail-field">
+                  <label>설명:</label>
+                  <span>{selectedMusic.description}</span>
+                </div>
+              )}
               <div className="modal-detail-field">
                 <label>카테고리:</label>
                 <span className="modal-category-badge">{selectedMusic.category}</span>
@@ -602,6 +624,33 @@ const MusicManagement = () => {
                     required
                     disabled={loading}
                     placeholder="음악 제목을 입력하세요"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="artist">아티스트/제작자 (선택)</label>
+                  <input
+                    type="text"
+                    id="artist"
+                    name="artist"
+                    value={formData.artist}
+                    onChange={handleInputChange}
+                    maxLength="200"
+                    disabled={loading}
+                    placeholder="아티스트 또는 제작자 이름"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="description">음악 설명 (선택)</label>
+                  <textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                    placeholder="음악에 대한 설명을 입력하세요"
+                    rows="3"
                   />
                 </div>
 
