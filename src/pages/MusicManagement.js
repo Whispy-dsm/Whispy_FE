@@ -516,7 +516,7 @@ const MusicManagement = () => {
         {/* 검색 결과 목록 */}
         {musicList.length > 0 && (
           <div className="results-list">
-            <h3>검색 결과 ({musicList.length}개 / 전체 {pagination.totalElements}개)</h3>
+            <h3>전체 {pagination.totalElements}개</h3>
             <div className="items-list" onScroll={handleScroll}>
               {musicList.map((music) => (
                 <div
@@ -533,13 +533,9 @@ const MusicManagement = () => {
                 </div>
               ))}
               {loadingMore && (
-                <div className="loading-more">
-                  <span>추가 데이터 로딩 중...</span>
-                </div>
-              )}
-              {!pagination.hasMore && musicList.length > 0 && (
-                <div className="no-more-data">
-                  <span>모든 데이터를 불러왔습니다</span>
+                <div className="loading-indicator">
+                  <div className="spinner"></div>
+                  <span>로딩 중</span>
                 </div>
               )}
             </div>

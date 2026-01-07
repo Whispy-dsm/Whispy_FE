@@ -137,7 +137,7 @@ const WithdrawalReasons = () => {
 
       <div className="content-grid">
         <div className="reasons-list">
-          <h2>사유 목록 ({reasons.length}개 / 전체 {pagination.totalElements}개)</h2>
+          <h2>전체 {pagination.totalElements}개</h2>
 
           {loading ? (
             <div className="loading">불러오는 중...</div>
@@ -159,13 +159,9 @@ const WithdrawalReasons = () => {
                       </div>
                     ))}
                     {loadingMore && (
-                      <div className="loading-more">
-                        <span>추가 데이터 로딩 중...</span>
-                      </div>
-                    )}
-                    {!pagination.hasMore && reasons.length > 0 && (
-                      <div className="no-more-data">
-                        <span>모든 데이터를 불러왔습니다</span>
+                      <div className="loading-indicator">
+                        <div className="spinner"></div>
+                        <span>로딩 중</span>
                       </div>
                     )}
                   </>
