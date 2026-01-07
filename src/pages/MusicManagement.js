@@ -60,11 +60,11 @@ const MusicManagement = () => {
       let response;
       if (searchType === 'all') {
         // 전체 조회 - 빈 키워드로 검색
-        response = await getAllMusic(0, 100, '');
+        response = await getAllMusic(0, 50, '');
       } else if (searchType === 'title') {
-        response = await getAllMusic(0, 100, searchKeyword);
+        response = await getAllMusic(0, 50, searchKeyword);
       } else if (searchType === 'category') {
-        response = await getMusicByCategory(selectedCategory, 0, 100);
+        response = await getMusicByCategory(selectedCategory, 0, 50);
       } else if (searchType === 'id') {
         // ID로 직접 조회
         if (searchKeyword) {

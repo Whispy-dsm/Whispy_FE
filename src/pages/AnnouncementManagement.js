@@ -45,7 +45,7 @@ const AnnouncementManagement = () => {
       }
 
       // 전체 목록 조회
-      const response = await getAllAnnouncements(0, 100);
+      const response = await getAllAnnouncements(0, 50);
       let results = response?.content || [];
 
       // 클라이언트 사이드 필터링
