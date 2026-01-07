@@ -121,9 +121,9 @@ export const getWithdrawalReasons = async (page = 0, size = 10, sort = 'createdA
   return toCamelCase(response.data);
 };
 
-export const getWithdrawalReasonsByDate = async (date, page = 0, size = 50) => {
+export const getWithdrawalReasonsByDate = async (startDate, endDate, page = 0, size = 50) => {
   const response = await api.get('/admin/withdrawal-reasons/by-date', {
-    params: { date, page, size },
+    params: { startDate, endDate, page, size },
   });
   return toCamelCase(response.data);
 };

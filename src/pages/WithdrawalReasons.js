@@ -24,7 +24,10 @@ const WithdrawalReasons = () => {
 
   // 날짜 필터 상태
   const [filterType, setFilterType] = useState('all'); // 'all' 또는 'date'
-  const [selectedDate, setSelectedDate] = useState('');
+  const [filterDateRange, setFilterDateRange] = useState({
+    startDate: '',
+    endDate: '',
+  });
 
   // 통계 상태
   const [statistics, setStatistics] = useState([]);
@@ -33,6 +36,9 @@ const WithdrawalReasons = () => {
     startDate: '',
     endDate: '',
   });
+  const [monthlyStats, setMonthlyStats] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [dailyStats, setDailyStats] = useState([]);
 
   useEffect(() => {
     loadReasons();
@@ -51,8 +57,8 @@ const WithdrawalReasons = () => {
     setLoading(true);
     try {
       let response;
-      if (filterType === 'date' && selectedDate) {
-        response = await getWithdrawalReasonsByDate(selectedDate, 0, pagination.size);
+      if (filterType === 'date' && filterDateRange.startDate && filterDateRange.endDate) {
+        response = await getWithdrawalReasonsByDate(filterDateRange.startDate, filterDateRange.endDate, 0, pagination.size);
       } else {
         response = await getWithdrawalReasons(0, pagination.size);
       }
@@ -78,8 +84,8 @@ const WithdrawalReasons = () => {
     try {
       const nextPage = pagination.page + 1;
       let response;
-      if (filterType === 'date' && selectedDate) {
-        response = await getWithdrawalReasonsByDate(selectedDate, nextPage, pagination.size);
+      if (filterType === 'date' && filterDateRange.startDate && filterDateRange.endDate) {
+        response = await getWithdrawalReasonsByDate(filterDateRange.startDate, filterDateRange.endDate, nextPage, pagination.size);
       } else {
         response = await getWithdrawalReasons(nextPage, pagination.size);
       }
@@ -108,6 +114,22 @@ const WithdrawalReasons = () => {
     try {
       const data = await getWithdrawalStatistics(statsDateRange.startDate, statsDateRange.endDate);
       setStatistics(data || []);
+
+      // 월별 데이터 집계
+      const monthlyMap = {};
+      data.forEach(stat => {
+        const month = stat.date.substring(0, 7); // "2024-01-15" -> "2024-01"
+        if (!monthlyMap[month]) {
+          monthlyMap[month] = { month, count: 0, dailyData: [] };
+        }
+        monthlyMap[month].count += stat.count;
+        monthlyMap[month].dailyData.push(stat);
+      });
+
+      const monthlyData = Object.values(monthlyMap).sort((a, b) => a.month.localeCompare(b.month));
+      setMonthlyStats(monthlyData);
+      setSelectedMonth(null);
+      setDailyStats([]);
     } catch (error) {
       setMessage({ type: 'error', text: '통계 불러오기 실패' });
     } finally {
@@ -115,16 +137,26 @@ const WithdrawalReasons = () => {
     }
   };
 
+  const handleMonthClick = (monthData) => {
+    if (selectedMonth === monthData.month) {
+      setSelectedMonth(null);
+      setDailyStats([]);
+    } else {
+      setSelectedMonth(monthData.month);
+      setDailyStats(monthData.dailyData);
+    }
+  };
+
   const handleFilterTypeChange = (type) => {
     setFilterType(type);
     if (type === 'all') {
-      setSelectedDate('');
+      setFilterDateRange({ startDate: '', endDate: '' });
     }
   };
 
   const handleDateSearch = () => {
-    if (filterType === 'date' && !selectedDate) {
-      setMessage({ type: 'error', text: '날짜를 선택해주세요' });
+    if (filterType === 'date' && (!filterDateRange.startDate || !filterDateRange.endDate)) {
+      setMessage({ type: 'error', text: '시작일과 종료일을 모두 선택해주세요' });
       return;
     }
     loadReasons();
@@ -169,7 +201,8 @@ const WithdrawalReasons = () => {
   };
 
   // 통계 최대값 계산 (바 차트 비율 계산용)
-  const maxCount = statistics.length > 0 ? Math.max(...statistics.map(s => s.count)) : 1;
+  const maxMonthlyCount = monthlyStats.length > 0 ? Math.max(...monthlyStats.map(s => s.count)) : 1;
+  const maxDailyCount = dailyStats.length > 0 ? Math.max(...dailyStats.map(s => s.count)) : 1;
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString();
@@ -240,9 +273,18 @@ const WithdrawalReasons = () => {
               <div className="date-filter">
                 <input
                   type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
+                  value={filterDateRange.startDate}
+                  onChange={(e) => setFilterDateRange({ ...filterDateRange, startDate: e.target.value })}
                   className="date-input"
+                  placeholder="시작일"
+                />
+                <span>~</span>
+                <input
+                  type="date"
+                  value={filterDateRange.endDate}
+                  onChange={(e) => setFilterDateRange({ ...filterDateRange, endDate: e.target.value })}
+                  className="date-input"
+                  placeholder="종료일"
                 />
                 <button className="search-btn" onClick={handleDateSearch}>
                   조회
@@ -254,8 +296,8 @@ const WithdrawalReasons = () => {
           <div className="content-grid">
             <div className="reasons-list">
               <h2>
-                {filterType === 'date' && selectedDate
-                  ? `${selectedDate} (${pagination.totalElements}개)`
+                {filterType === 'date' && filterDateRange.startDate && filterDateRange.endDate
+                  ? `${filterDateRange.startDate} ~ ${filterDateRange.endDate} (${pagination.totalElements}개)`
                   : `전체 ${pagination.totalElements}개`}
               </h2>
 
@@ -365,25 +407,56 @@ const WithdrawalReasons = () => {
             <div className="loading-indicator">
               <div className="spinner"></div>
             </div>
-          ) : statistics.length > 0 ? (
+          ) : monthlyStats.length > 0 ? (
             <div className="stats-chart">
               <div className="stats-summary">
                 <span>총 탈퇴 건수: <strong>{statistics.reduce((sum, s) => sum + s.count, 0)}건</strong></span>
               </div>
-              <div className="stats-bars">
-                {statistics.map((stat, index) => (
-                  <div key={index} className="stats-bar-item">
-                    <div className="stats-bar-label">{stat.date}</div>
-                    <div className="stats-bar-container">
-                      <div
-                        className="stats-bar"
-                        style={{ width: `${(stat.count / maxCount) * 100}%` }}
-                      ></div>
-                      <span className="stats-bar-count">{stat.count}건</span>
+
+              {/* 월별 세로 바 그래프 */}
+              <div className="vertical-chart-container">
+                <div className="vertical-bars">
+                  {monthlyStats.map((stat, index) => (
+                    <div
+                      key={index}
+                      className={`vertical-bar-item ${selectedMonth === stat.month ? 'active' : ''}`}
+                      onClick={() => handleMonthClick(stat)}
+                    >
+                      <div className="vertical-bar-count">{stat.count}건</div>
+                      <div className="vertical-bar-wrapper">
+                        <div
+                          className="vertical-bar"
+                          style={{ height: `${(stat.count / maxMonthlyCount) * 100}%` }}
+                        ></div>
+                      </div>
+                      <div className="vertical-bar-label">{stat.month}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 일별 상세 그래프 */}
+              {selectedMonth && dailyStats.length > 0 && (
+                <div className="daily-chart">
+                  <h3>{selectedMonth} 일별 상세</h3>
+                  <div className="vertical-chart-container daily">
+                    <div className="vertical-bars">
+                      {dailyStats.map((stat, index) => (
+                        <div key={index} className="vertical-bar-item small">
+                          <div className="vertical-bar-count">{stat.count}</div>
+                          <div className="vertical-bar-wrapper">
+                            <div
+                              className="vertical-bar"
+                              style={{ height: `${(stat.count / maxDailyCount) * 100}%` }}
+                            ></div>
+                          </div>
+                          <div className="vertical-bar-label">{stat.date.split('-')[2]}</div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="empty-state">

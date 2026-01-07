@@ -316,7 +316,7 @@
   height: 24px;
   background: #f5f5f5;
   border-radius: 4px;
-  overflow: hidden;
+  position: relative;
 }
 
 .stats-bar {
@@ -325,13 +325,18 @@
   border-radius: 4px;
   min-width: 4px;
   transition: width 0.3s ease;
+  position: absolute;
+  left: 0;
 }
 
 .stats-bar-count {
   font-size: 12px;
   font-weight: 500;
   color: #1a1a1a;
-  padding-right: 8px;
+  padding-left: 8px;
+  margin-left: auto;
+  white-space: nowrap;
+  z-index: 1;
 }
 
 .empty-state {
@@ -339,4 +344,114 @@
   text-align: center;
   color: #a3a3a3;
   font-size: 14px;
+}
+
+/* 세로 바 그래프 */
+.vertical-chart-container {
+  padding: 24px 0;
+  overflow-x: auto;
+}
+
+.vertical-chart-container.daily {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+}
+
+.vertical-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  min-height: 300px;
+  padding: 0 16px;
+}
+
+.vertical-bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 60px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vertical-bar-item:hover {
+  transform: translateY(-4px);
+}
+
+.vertical-bar-item.active {
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 8px;
+  margin: -8px;
+}
+
+.vertical-bar-item.small {
+  min-width: 40px;
+  cursor: default;
+}
+
+.vertical-bar-item.small:hover {
+  transform: none;
+}
+
+.vertical-bar-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1a1a1a;
+  min-height: 20px;
+}
+
+.vertical-bar-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  min-height: 200px;
+  position: relative;
+}
+
+.vertical-bar {
+  width: 100%;
+  background: linear-gradient(180deg, #1a1a1a, #404040);
+  border-radius: 4px 4px 0 0;
+  min-height: 8px;
+  transition: height 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.vertical-bar-item:hover .vertical-bar {
+  background: linear-gradient(180deg, #404040, #666);
+}
+
+.vertical-bar-item.active .vertical-bar {
+  background: linear-gradient(180deg, #667eea, #764ba2);
+}
+
+.vertical-bar-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #737373;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.vertical-bar-item.active .vertical-bar-label {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.daily-chart {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid #e5e5e5;
+}
+
+.daily-chart h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
 }
