@@ -15,6 +15,12 @@ const AnnouncementManagement = () => {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    hasMore: true,
+    totalElements: 0,
+  });
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [toast, setToast] = useState(null);
@@ -34,6 +40,7 @@ const AnnouncementManagement = () => {
   const handleSearch = async () => {
     setLoading(true);
     setMessage({ type: '', text: '' });
+    setPagination({ page: 0, hasMore: true, totalElements: 0 });
     try {
       if (searchType === 'id' && searchKeyword) {
         // ID로 직접 조회
@@ -41,6 +48,7 @@ const AnnouncementManagement = () => {
         const announcement = { id: parseInt(searchKeyword), ...detail };
         setSelectedAnnouncement(announcement);
         setAnnouncements([announcement]);
+        setPagination({ page: 0, hasMore: false, totalElements: 1 });
         return;
       }
 
@@ -56,10 +64,45 @@ const AnnouncementManagement = () => {
       }
 
       setAnnouncements(results);
+      setPagination({
+        page: 0,
+        hasMore: results.length >= 50 && searchType !== 'title',
+        totalElements: response?.totalElements || 0,
+      });
     } catch (error) {
       setMessage({ type: 'error', text: '공지사항 검색 실패' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMore = async () => {
+    if (loadingMore || !pagination.hasMore || searchType === 'title') return;
+
+    setLoadingMore(true);
+    try {
+      const nextPage = pagination.page + 1;
+      const response = await getAllAnnouncements(nextPage, 50);
+      const newContent = response?.content || [];
+
+      setAnnouncements(prev => [...prev, ...newContent]);
+      setPagination({
+        page: nextPage,
+        hasMore: newContent.length >= 50,
+        totalElements: response?.totalElements || 0,
+      });
+    } catch (error) {
+      setMessage({ type: 'error', text: '추가 데이터 로드 실패' });
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const handleScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    // 스크롤이 하단 100px 이내에 도달하면 더 로드
+    if (scrollHeight - scrollTop - clientHeight < 100) {
+      loadMore();
     }
   };
 
@@ -363,8 +406,8 @@ const AnnouncementManagement = () => {
         {/* 검색 결과 목록 */}
         {announcements.length > 0 && (
           <div className="results-list">
-            <h3>검색 결과 ({announcements.length}개)</h3>
-            <div className="items-list">
+            <h3>검색 결과 ({announcements.length}개 / 전체 {pagination.totalElements}개)</h3>
+            <div className="items-list" onScroll={handleScroll}>
               {announcements.map((announcement) => (
                 <div
                   key={announcement.id}
@@ -379,6 +422,16 @@ const AnnouncementManagement = () => {
                   </div>
                 </div>
               ))}
+              {loadingMore && (
+                <div className="loading-more">
+                  <span>추가 데이터 로딩 중...</span>
+                </div>
+              )}
+              {!pagination.hasMore && announcements.length > 0 && (
+                <div className="no-more-data">
+                  <span>모든 데이터를 불러왔습니다</span>
+                </div>
+              )}
             </div>
           </div>
         )}

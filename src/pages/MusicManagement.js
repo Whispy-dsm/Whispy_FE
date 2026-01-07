@@ -16,6 +16,12 @@ const MusicManagement = () => {
   const [selectedMusic, setSelectedMusic] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    hasMore: true,
+    totalElements: 0,
+  });
   const [uploadingFile, setUploadingFile] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
@@ -56,6 +62,7 @@ const MusicManagement = () => {
   const handleSearch = async () => {
     setLoading(true);
     setMessage({ type: '', text: '' });
+    setPagination({ page: 0, hasMore: true, totalElements: 0 });
     try {
       let response;
       if (searchType === 'all') {
@@ -71,14 +78,59 @@ const MusicManagement = () => {
           const detail = await getMusicDetail(parseInt(searchKeyword));
           setSelectedMusic({ id: parseInt(searchKeyword), ...detail });
           setMusicList([{ id: parseInt(searchKeyword), ...detail }]);
+          setPagination({ page: 0, hasMore: false, totalElements: 1 });
           return;
         }
       }
-      setMusicList(response?.content || []);
+      const content = response?.content || [];
+      setMusicList(content);
+      setPagination({
+        page: 0,
+        hasMore: content.length >= 50,
+        totalElements: response?.totalElements || 0,
+      });
     } catch (error) {
       setMessage({ type: 'error', text: '음악 검색 실패' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMore = async () => {
+    if (loadingMore || !pagination.hasMore) return;
+
+    setLoadingMore(true);
+    try {
+      const nextPage = pagination.page + 1;
+      let response;
+
+      if (searchType === 'all') {
+        response = await getAllMusic(nextPage, 50, '');
+      } else if (searchType === 'title') {
+        response = await getAllMusic(nextPage, 50, searchKeyword);
+      } else if (searchType === 'category') {
+        response = await getMusicByCategory(selectedCategory, nextPage, 50);
+      }
+
+      const newContent = response?.content || [];
+      setMusicList(prev => [...prev, ...newContent]);
+      setPagination({
+        page: nextPage,
+        hasMore: newContent.length >= 50,
+        totalElements: response?.totalElements || 0,
+      });
+    } catch (error) {
+      setMessage({ type: 'error', text: '추가 데이터 로드 실패' });
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const handleScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    // 스크롤이 하단 100px 이내에 도달하면 더 로드
+    if (scrollHeight - scrollTop - clientHeight < 100) {
+      loadMore();
     }
   };
 
@@ -464,8 +516,8 @@ const MusicManagement = () => {
         {/* 검색 결과 목록 */}
         {musicList.length > 0 && (
           <div className="results-list">
-            <h3>검색 결과 ({musicList.length}개)</h3>
-            <div className="items-list">
+            <h3>검색 결과 ({musicList.length}개 / 전체 {pagination.totalElements}개)</h3>
+            <div className="items-list" onScroll={handleScroll}>
               {musicList.map((music) => (
                 <div
                   key={music.id}
@@ -480,6 +532,16 @@ const MusicManagement = () => {
                   </div>
                 </div>
               ))}
+              {loadingMore && (
+                <div className="loading-more">
+                  <span>추가 데이터 로딩 중...</span>
+                </div>
+              )}
+              {!pagination.hasMore && musicList.length > 0 && (
+                <div className="no-more-data">
+                  <span>모든 데이터를 불러왔습니다</span>
+                </div>
+              )}
             </div>
           </div>
         )}
