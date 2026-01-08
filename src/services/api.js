@@ -11,6 +11,10 @@ const api = axios.create({
   },
 });
 
+// Token refresh state
+let isRefreshing = false;
+let failedQueue = [];
+
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
@@ -36,6 +40,17 @@ api.interceptors.request.use(
   }
 );
 
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 // Response interceptor to handle errors
 api.interceptors.response.use(
   (response) => response,
@@ -44,7 +59,22 @@ api.interceptors.response.use(
 
     // Handle 401 errors (unauthorized)
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // Token refresh is already in progress, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
@@ -64,20 +94,28 @@ api.interceptors.response.use(
             localStorage.setItem('refreshToken', response.data.refresh_token);
           }
 
+          // Process queued requests
+          processQueue(null, accessToken);
+
           // Retry the original request
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return api(originalRequest);
         } catch (refreshError) {
           // Refresh failed, logout user
+          processQueue(refreshError, null);
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           window.location.href = '/login';
           return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
         }
       } else {
         // No refresh token, redirect to login
+        isRefreshing = false;
         localStorage.removeItem('accessToken');
         window.location.href = '/login';
+        return Promise.reject(new Error('No refresh token available'));
       }
     }
 
