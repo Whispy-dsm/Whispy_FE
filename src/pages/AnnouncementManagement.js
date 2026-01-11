@@ -4,6 +4,7 @@ import { uploadFile, deleteFile, FILE_FOLDERS } from '../services/fileService';
 import Toast from '../components/Toast';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
+import ReactMarkdown from 'react-markdown';
 import '../styles/AnnouncementManagement.css';
 
 const AnnouncementManagement = () => {
@@ -416,9 +417,10 @@ const AnnouncementManagement = () => {
                 >
                   <div className="item-id">ID: {announcement.id}</div>
                   <div className="item-title">{announcement.title}</div>
-                  <div className="item-content-preview">
-                    {announcement.content.substring(0, 100)}
-                    {announcement.content.length > 100 ? '...' : ''}
+                  <div className="item-content-preview markdown-content">
+                    <ReactMarkdown>
+                      {announcement.content}
+                    </ReactMarkdown>
                   </div>
                 </div>
               ))}
@@ -452,7 +454,9 @@ const AnnouncementManagement = () => {
               </div>
               <div className="modal-detail-field">
                 <label>내용:</label>
-                <p className="modal-detail-content-text">{selectedAnnouncement.content}</p>
+                <div className="modal-detail-content-text markdown-content">
+                  <ReactMarkdown>{selectedAnnouncement.content}</ReactMarkdown>
+                </div>
               </div>
               {selectedAnnouncement.bannerImageUrl && (
                 <div className="modal-detail-field">

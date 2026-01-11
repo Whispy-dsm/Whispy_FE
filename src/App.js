@@ -10,6 +10,7 @@ import AnnouncementManagement from "./pages/AnnouncementManagement";
 import NotificationManagement from "./pages/NotificationManagement";
 import WithdrawalReasons from "./pages/WithdrawalReasons";
 import TopicManagement from "./pages/TopicManagement";
+import FileUploadManagement from "./pages/FileUploadManagement";
 import "./App.css";
 
 const HEALTH_CHECK_INTERVAL = 10000; // 10초
@@ -61,6 +62,7 @@ function App() {
                     <Route path="/notifications" element={<NotificationManagement />} />
                     <Route path="/withdrawal-reasons" element={<WithdrawalReasons />} />
                     <Route path="/topics" element={<TopicManagement />} />
+                    <Route path="/file-upload" element={<FileUploadManagement />} />
                   </Routes>
                 </Layout>
               </ProtectedRoute>

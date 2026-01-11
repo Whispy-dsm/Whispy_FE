@@ -183,9 +183,55 @@ textarea {
 
 .item-content-preview {
   font-size: 13px;
-  color: #a3a3a3;
+  color: #737373;
   margin-top: 4px;
   line-height: 1.4;
+  max-height: 150px;
+  overflow: hidden;
+  position: relative;
+}
+
+.item-content-preview::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, transparent, white);
+  pointer-events: none;
+}
+
+/* 미리보기 내 마크다운 요소 크기 조정 */
+.item-content-preview.markdown-content h1,
+.item-content-preview.markdown-content h2 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 4px 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.item-content-preview.markdown-content h3,
+.item-content-preview.markdown-content h4,
+.item-content-preview.markdown-content h5,
+.item-content-preview.markdown-content h6 {
+  font-size: 13px;
+  font-weight: 600;
+  color: #404040;
+  margin: 4px 0;
+}
+
+.item-content-preview.markdown-content p {
+  font-size: 13px;
+  color: #737373;
+  margin: 2px 0;
+}
+
+.item-content-preview.markdown-content img {
+  max-height: 120px;
+  margin: 4px 0;
 }
 
 .form-actions {
@@ -421,4 +467,162 @@ textarea {
     font-size: 12px;
     padding: 10px;
   }
+}
+
+/* 마크다운 스타일 */
+.markdown-content {
+  line-height: 1.6;
+  color: #1a1a1a;
+}
+
+.markdown-content h1 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 20px 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e5e5e5;
+  letter-spacing: -0.02em;
+}
+
+.markdown-content h2 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 18px 0 10px 0;
+  letter-spacing: -0.02em;
+}
+
+.markdown-content h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 16px 0 8px 0;
+  letter-spacing: -0.01em;
+}
+
+.markdown-content h4 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 14px 0 8px 0;
+}
+
+.markdown-content h5 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 12px 0 6px 0;
+}
+
+.markdown-content h6 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 10px 0 6px 0;
+  color: #737373;
+}
+
+.markdown-content p {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.markdown-content em {
+  font-style: italic;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+.markdown-content ul {
+  list-style-type: disc;
+}
+
+.markdown-content ol {
+  list-style-type: decimal;
+}
+
+.markdown-content li {
+  margin: 4px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.markdown-content blockquote {
+  margin: 12px 0;
+  padding: 8px 16px;
+  border-left: 4px solid #667eea;
+  background: #f5f5f5;
+  color: #404040;
+  font-style: italic;
+}
+
+.markdown-content code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+.markdown-content pre {
+  background: #1a1a1a;
+  color: #f5f5f5;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.markdown-content pre code {
+  background: transparent;
+  padding: 0;
+  color: #f5f5f5;
+}
+
+.markdown-content a {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+}
+
+.markdown-content hr {
+  border: none;
+  border-top: 1px solid #e5e5e5;
+  margin: 20px 0;
+}
+
+.markdown-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 12px 0;
+}
+
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid #e5e5e5;
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 13px;
+}
+
+.markdown-content th {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 12px 0;
 }

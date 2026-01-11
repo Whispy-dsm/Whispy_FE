@@ -1,0 +1,325 @@
+@import './Common.css';
+
+.file-upload-management {
+  animation: fadeIn 0.5s;
+}
+
+.upload-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid #e5e5e5;
+}
+
+.folder-selector {
+  margin-bottom: 16px;
+}
+
+.folder-selector label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.folder-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 400;
+  transition: all 0.15s ease;
+}
+
+.folder-select:focus {
+  outline: none;
+  border-color: #1a1a1a;
+}
+
+.upload-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upload-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  background: #1a1a1a;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: -0.01em;
+  text-align: center;
+  width: fit-content;
+}
+
+.upload-btn:hover:not(.disabled) {
+  background: #404040;
+}
+
+.upload-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upload-info {
+  font-size: 13px;
+  color: #737373;
+  margin: 0;
+}
+
+.files-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #e5e5e5;
+}
+
+.files-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.files-section h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.clear-all-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  background: #dc2626;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.clear-all-btn:hover {
+  background: #b91c1c;
+}
+
+.total-size {
+  font-size: 14px;
+  font-weight: 400;
+  color: #737373;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #a3a3a3;
+}
+
+.empty-state p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.empty-state-hint {
+  font-size: 13px;
+  color: #d4d4d4;
+}
+
+.files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.file-card {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.15s ease;
+  background: #fafafa;
+}
+
+.file-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.file-preview {
+  width: 100%;
+  height: 200px;
+  background: white;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.file-preview-thumbnail {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.file-preview-thumbnail:hover {
+  transform: scale(1.05);
+}
+
+.file-preview-audio {
+  width: 100%;
+  height: 40px;
+}
+
+.file-preview-video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.file-preview-icon {
+  font-size: 48px;
+  color: #a3a3a3;
+}
+
+.file-info {
+  margin-bottom: 12px;
+}
+
+.file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+
+.file-meta {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #737373;
+}
+
+.file-url {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.url-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+  color: #737373;
+  background: white;
+}
+
+.url-input:focus {
+  outline: none;
+  border-color: #1a1a1a;
+}
+
+.copy-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a1a1a;
+  background: white;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.copy-btn:hover {
+  background: #f5f5f5;
+}
+
+.file-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.delete-btn {
+  flex: 1;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  background: #dc2626;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: -0.01em;
+}
+
+.delete-btn:hover {
+  background: #b91c1c;
+}
+
+.image-viewer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.full-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .files-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .file-card {
+    padding: 12px;
+  }
+
+  .file-preview {
+    height: 180px;
+  }
+
+  .upload-btn {
+    width: 100%;
+  }
+
+  .file-meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

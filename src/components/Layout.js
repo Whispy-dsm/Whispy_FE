@@ -21,12 +21,13 @@ const Layout = ({ children }) => {
   };
 
   const menuItems = [
-    { path: '/admin', label: '대시보드', icon: '□' },
-    { path: '/admin/music', label: '음악 관리', icon: '♪' },
-    { path: '/admin/announcements', label: '공지사항', icon: '!' },
-    { path: '/admin/notifications', label: '알림 발송', icon: '○' },
-    { path: '/admin/topics', label: '토픽 관리', icon: '#' },
-    { path: '/admin/withdrawal-reasons', label: '탈퇴 사유', icon: '⋯' },
+    { path: '/admin', label: '대시보드', icon: '🏠' },
+    { path: '/admin/music', label: '음악 관리', icon: '🎵' },
+    { path: '/admin/announcements', label: '공지사항', icon: '📋' },
+    { path: '/admin/notifications', label: '알림 발송', icon: '💬' },
+    { path: '/admin/topics', label: '토픽 관리', icon: '🏷️' },
+    { path: '/admin/withdrawal-reasons', label: '탈퇴 사유', icon: '📊' },
+    { path: '/admin/file-upload', label: '파일 업로드', icon: '📁' },
   ];
 
   return (
