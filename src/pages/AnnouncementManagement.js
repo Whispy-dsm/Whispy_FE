@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { getAllAnnouncements, getAnnouncementDetail, createAnnouncement, updateAnnouncement, deleteAnnouncement } from '../services/adminService';
-import { uploadFile, deleteFile, FILE_FOLDERS } from '../services/fileService';
 import Toast from '../components/Toast';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -22,20 +21,15 @@ const AnnouncementManagement = () => {
     hasMore: true,
     totalElements: 0,
   });
-  const [uploadingBanner, setUploadingBanner] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
   const [toast, setToast] = useState(null);
   const [imageViewerUrl, setImageViewerUrl] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null });
 
-  // 생성 모드에서 업로드된 파일 URL 추적 (취소 시 삭제용)
-  const [uploadedBannerUrl, setUploadedBannerUrl] = useState(null);
-
   const [formData, setFormData] = useState({
     id: '',
     title: '',
     content: '',
-    bannerImageUrl: '',
   });
 
   const handleSearch = async () => {
@@ -119,7 +113,6 @@ const AnnouncementManagement = () => {
         id: announcementDetail.id,
         title: announcementDetail.title,
         content: announcementDetail.content,
-        bannerImageUrl: announcementDetail.bannerImageUrl || '',
       });
       setShowDetailModal(true);
     } catch (error) {
@@ -134,105 +127,12 @@ const AnnouncementManagement = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleBannerUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // 파일 크기 검증 (5MB = 5 * 1024 * 1024 bytes)
-    const MAX_FILE_SIZE = 5 * 1024 * 1024;
-    if (file.size > MAX_FILE_SIZE) {
-      setMessage({ type: 'error', text: '5MB 이상 파일은 업로드할 수 없습니다.' });
-      e.target.value = ''; // 파일 input 초기화
-      return;
-    }
-
-    setUploadingBanner(true);
-    setMessage({ type: '', text: '' });
-
-    try {
-      // 기존 배너 이미지가 있으면 먼저 삭제
-      const existingUrl = formData.bannerImageUrl;
-
-      if (existingUrl) {
-        try {
-          // URL에서 파일명 추출 (쿼리 파라미터 제거)
-          const urlWithoutParams = existingUrl.split('?')[0];
-          const fileName = urlWithoutParams.split('/').pop();
-          await deleteFile(FILE_FOLDERS.ANNOUNCEMENT_BANNER, fileName);
-        } catch (deleteError) {
-          // 삭제 실패해도 새 파일 업로드는 계속 진행
-        }
-      }
-
-      const response = await uploadFile(file, FILE_FOLDERS.ANNOUNCEMENT_BANNER);
-
-      // formData 상태를 함수형 업데이트로 변경
-      setFormData(prev => ({ ...prev, bannerImageUrl: response.fileUrl }));
-
-      // create 모드일 때만 업로드된 파일 추적 (취소 시 삭제용)
-      if (action === 'create') {
-        setUploadedBannerUrl(response.fileUrl);
-      }
-
-      setToast({ type: 'success', text: `배너 이미지 업로드 성공: ${file.name}` });
-    } catch (error) {
-      setMessage({ type: 'error', text: error.response?.data?.message || '배너 이미지 업로드 실패' });
-    } finally {
-      setUploadingBanner(false);
-    }
-  };
-
-  const handleBannerDelete = async () => {
-    if (!formData.bannerImageUrl) return;
-
-    const confirmDelete = async () => {
-      setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null });
-      setUploadingBanner(true);
-      setMessage({ type: '', text: '' });
-
-      try {
-        // URL에서 파일명 추출 (쿼리 파라미터 제거)
-        const urlWithoutParams = formData.bannerImageUrl.split('?')[0];
-        const fileName = urlWithoutParams.split('/').pop();
-        await deleteFile(FILE_FOLDERS.ANNOUNCEMENT_BANNER, fileName);
-
-        // 폼 데이터에서 URL 제거 (함수형 업데이트)
-        setFormData(prev => ({ ...prev, bannerImageUrl: '' }));
-        setToast({ type: 'success', text: '배너 이미지가 삭제되었습니다' });
-      } catch (error) {
-        setMessage({ type: 'error', text: error.response?.data?.message || '배너 삭제 실패' });
-      } finally {
-        setUploadingBanner(false);
-      }
-    };
-
-    setConfirmModal({
-      isOpen: true,
-      title: '삭제 확인',
-      message: '이 배너 이미지를 삭제하시겠습니까?',
-      onConfirm: confirmDelete,
-    });
-  };
-
-  const resetForm = async () => {
-    // create 모드에서 업로드한 배너를 서버에서 삭제
-    if (action === 'create' && uploadedBannerUrl) {
-      try {
-        const urlWithoutParams = uploadedBannerUrl.split('?')[0];
-        const fileName = urlWithoutParams.split('/').pop();
-        await deleteFile(FILE_FOLDERS.ANNOUNCEMENT_BANNER, fileName);
-      } catch (error) {
-        console.error('배너 삭제 실패:', error);
-      }
-    }
-
+  const resetForm = () => {
     setFormData({
       id: '',
       title: '',
       content: '',
-      bannerImageUrl: '',
     });
-    setUploadedBannerUrl(null);
     setSelectedAnnouncement(null);
     setShowDetailModal(false);
     setAction(null);
@@ -253,19 +153,7 @@ const AnnouncementManagement = () => {
       const { id, ...createData } = formData;
       await createAnnouncement(createData);
       setToast({ type: 'success', text: '공지사항이 성공적으로 생성되었습니다!' });
-
-      // 성공 시에는 uploadedBannerUrl 초기화만 (파일 삭제 안 함)
-      setUploadedBannerUrl(null);
-      setFormData({
-        id: '',
-        title: '',
-        content: '',
-        bannerImageUrl: '',
-      });
-      setSelectedAnnouncement(null);
-      setShowDetailModal(false);
-      setAction(null);
-      setMessage({ type: '', text: '' });
+      resetForm();
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.message || '공지사항 생성 실패' });
     } finally {
@@ -362,7 +250,6 @@ const AnnouncementManagement = () => {
               id: '',
               title: '',
               content: '',
-              bannerImageUrl: '',
             });
             setSelectedAnnouncement(null);
             setShowDetailModal(false);
@@ -458,28 +345,6 @@ const AnnouncementManagement = () => {
                   <ReactMarkdown>{selectedAnnouncement.content}</ReactMarkdown>
                 </div>
               </div>
-              {selectedAnnouncement.bannerImageUrl && (
-                <div className="modal-detail-field">
-                  <label>배너 이미지:</label>
-                  <div>
-                    <img
-                      src={selectedAnnouncement.bannerImageUrl}
-                      alt="배너"
-                      className="modal-detail-image clickable"
-                      onClick={() => setImageViewerUrl(selectedAnnouncement.bannerImageUrl)}
-                      style={{ cursor: 'pointer', maxWidth: '200px', maxHeight: '200px', display: 'block', borderRadius: '8px' }}
-                    />
-                    <button
-                      type="button"
-                      className="view-image-btn"
-                      onClick={() => setImageViewerUrl(selectedAnnouncement.bannerImageUrl)}
-                      style={{ marginTop: '8px' }}
-                    >
-                      크게 보기
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="modal-action-buttons">
@@ -542,52 +407,21 @@ const AnnouncementManagement = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="content">내용 *</label>
+                  <label htmlFor="content">내용 (마크다운) *</label>
                   <textarea
                     id="content"
                     name="content"
                     value={formData.content}
                     onChange={handleInputChange}
                     maxLength="10000"
-                    rows="10"
+                    rows="15"
                     required
                     disabled={loading}
-                    placeholder="공지사항 내용을 입력하세요"
+                    placeholder="마크다운 형식으로 작성하세요. 이미지는 ![alt](url) 형식으로 추가할 수 있습니다."
                   />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="bannerImage">배너 이미지 (선택)</label>
-                  <input
-                    type="file"
-                    id="bannerImage"
-                    accept="image/*"
-                    onChange={handleBannerUpload}
-                    disabled={loading || uploadingBanner}
-                  />
-                  {uploadingBanner && <span className="uploading-text">업로드 중...</span>}
-                  {formData.bannerImageUrl && (
-                    <div className="file-preview">
-                      <img
-                        src={formData.bannerImageUrl}
-                        alt="배너 미리보기"
-                        className="preview-image clickable"
-                        onClick={() => setImageViewerUrl(formData.bannerImageUrl)}
-                        style={{ cursor: 'pointer' }}
-                      />
-                      <div className="file-preview-actions">
-                        <span>✓ 업로드됨</span>
-                        <button
-                          type="button"
-                          className="file-delete-btn"
-                          onClick={handleBannerDelete}
-                          disabled={loading || uploadingBanner}
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                  <p style={{ fontSize: '12px', color: '#737373', marginTop: '4px' }}>
+                    💡 이미지 추가: 파일 업로드 페이지에서 이미지를 업로드한 후 URL을 복사하여 ![이미지](URL) 형식으로 추가하세요
+                  </p>
                 </div>
               </>
             )}
@@ -602,7 +436,7 @@ const AnnouncementManagement = () => {
               <button
                 type="submit"
                 className="submit-btn"
-                disabled={loading || uploadingBanner}
+                disabled={loading}
               >
                 {loading ? '처리 중...' :
                  action === 'create' ? '공지사항 생성' :
