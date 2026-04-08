@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { getAllMusic, getMusicByCategory, getMusicDetail, createMusic, updateMusic, deleteMusic } from '../services/adminService';
-import { uploadFile, deleteFile, FILE_FOLDERS } from '../services/fileService';
+import { uploadFile, deleteFileByUrl, normalizeFileUrl, FILE_FOLDERS } from '../services/fileService';
 import Toast from '../components/Toast';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -139,7 +139,13 @@ const MusicManagement = () => {
     try {
       // 상세 정보 조회 API 호출
       const detail = await getMusicDetail(music.id);
-      const musicDetail = { id: music.id, ...detail };
+      const musicDetail = {
+        id: music.id,
+        ...detail,
+        filePath: normalizeFileUrl(detail.filePath),
+        bannerImageUrl: normalizeFileUrl(detail.bannerImageUrl),
+        videoUrl: normalizeFileUrl(detail.videoUrl),
+      };
 
       setSelectedMusic(musicDetail);
       setFormData({
@@ -201,9 +207,7 @@ const MusicManagement = () => {
       if (existingUrl) {
         try {
           // URL에서 파일명 추출 (쿼리 파라미터 제거)
-          const urlWithoutParams = existingUrl.split('?')[0];
-          const fileName = urlWithoutParams.split('/').pop();
-          await deleteFile(folder, fileName);
+          await deleteFileByUrl(existingUrl, folder);
         } catch (deleteError) {
           // 삭제 실패해도 새 파일 업로드는 계속 진행
         }
@@ -246,9 +250,7 @@ const MusicManagement = () => {
 
       try {
         // URL에서 파일명 추출 (쿼리 파라미터 제거)
-        const urlWithoutParams = existingUrl.split('?')[0];
-        const fileName = urlWithoutParams.split('/').pop();
-        await deleteFile(folder, fileName);
+        await deleteFileByUrl(existingUrl, folder);
 
         // 폼 데이터에서 URL 제거 (함수형 업데이트)
         setFormData(prev => ({ ...prev, [field]: '' }));
@@ -287,9 +289,7 @@ const MusicManagement = () => {
       await Promise.allSettled(
         filesToDelete.map(async ({ url, folder }) => {
           try {
-            const urlWithoutParams = url.split('?')[0];
-            const fileName = urlWithoutParams.split('/').pop();
-            await deleteFile(folder, fileName);
+            await deleteFileByUrl(url, folder);
           } catch (error) {
             console.error('파일 삭제 실패:', error);
           }

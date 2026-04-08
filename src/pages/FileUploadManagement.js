@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { uploadFile, deleteFile, FILE_FOLDERS } from '../services/fileService';
+import { uploadFile, deleteFileByUrl, normalizeFileUrl, FILE_FOLDERS } from '../services/fileService';
 import Toast from '../components/Toast';
 import Modal from '../components/Modal';
 import ConfirmModal from '../components/ConfirmModal';
@@ -11,7 +11,9 @@ const FileUploadManagement = () => {
   });
   const [uploadedFiles, setUploadedFiles] = useState(() => {
     const saved = localStorage.getItem('uploadedFiles');
-    return saved ? JSON.parse(saved) : [];
+    return saved
+      ? JSON.parse(saved).map(file => ({ ...file, url: normalizeFileUrl(file.url) }))
+      : [];
   });
   const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState(null);
@@ -85,9 +87,7 @@ const FileUploadManagement = () => {
       setMessage({ type: '', text: '' });
 
       try {
-        const urlWithoutParams = file.url.split('?')[0];
-        const fileName = urlWithoutParams.split('/').pop();
-        await deleteFile(FILE_FOLDERS[file.folder], fileName);
+        await deleteFileByUrl(file.url, FILE_FOLDERS[file.folder]);
 
         setUploadedFiles(prev => prev.filter(f => f.id !== file.id));
         setToast({ type: 'success', text: '파일이 삭제되었습니다' });
@@ -111,22 +111,24 @@ const FileUploadManagement = () => {
   };
 
   const renderFilePreview = (file) => {
+    const previewUrl = normalizeFileUrl(file.url);
+
     if (file.type.startsWith('image/')) {
       return (
         <img
-          src={file.url}
+          src={previewUrl}
           alt={file.name}
           className="file-preview-thumbnail"
-          onClick={() => setImageViewerUrl(file.url)}
+          onClick={() => setImageViewerUrl(previewUrl)}
         />
       );
     } else if (file.type.startsWith('audio/')) {
       return (
-        <audio src={file.url} controls className="file-preview-audio" />
+        <audio src={previewUrl} controls className="file-preview-audio" />
       );
     } else if (file.type.startsWith('video/')) {
       return (
-        <video src={file.url} controls className="file-preview-video" />
+        <video src={previewUrl} controls className="file-preview-video" />
       );
     }
     return <div className="file-preview-icon">📄</div>;
@@ -271,7 +273,7 @@ const FileUploadManagement = () => {
                   <div className="file-url">
                     <input
                       type="text"
-                      value={file.url}
+                      value={normalizeFileUrl(file.url)}
                       readOnly
                       className="url-input"
                       onClick={(e) => e.target.select()}
@@ -279,7 +281,7 @@ const FileUploadManagement = () => {
                     <button
                       className="copy-btn"
                       onClick={() => {
-                        navigator.clipboard.writeText(file.url);
+                        navigator.clipboard.writeText(normalizeFileUrl(file.url));
                         setToast({ type: 'success', text: 'URL이 복사되었습니다' });
                       }}
                     >

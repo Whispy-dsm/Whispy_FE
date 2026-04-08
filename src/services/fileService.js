@@ -1,6 +1,18 @@
 import api from './api';
 import heic2any from 'heic2any';
 
+const getApiBaseUrl = () => {
+  if (process.env.REACT_APP_API_BASE_URL) {
+    return process.env.REACT_APP_API_BASE_URL;
+  }
+
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin;
+  }
+
+  return '';
+};
+
 /**
  * HEIC 파일을 JPG로 변환합니다
  * @param {File} file - 변환할 HEIC 파일
@@ -27,6 +39,54 @@ const convertHeicToJpg = async (file) => {
   }
 };
 
+export const normalizeFileUrl = (fileUrl) => {
+  if (!fileUrl) {
+    return '';
+  }
+
+  if (/^https?:\/\//i.test(fileUrl)) {
+    return fileUrl;
+  }
+
+  const baseUrl = getApiBaseUrl();
+  if (!baseUrl) {
+    return fileUrl;
+  }
+
+  const normalizedPath = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+  return new URL(normalizedPath, baseUrl).toString();
+};
+
+export const getFileDeleteParams = (fileUrl, fallbackFolder) => {
+  const normalizedUrl = normalizeFileUrl(fileUrl);
+  const parsedUrl = new URL(normalizedUrl, 'https://whispy.local');
+  const pathSegments = parsedUrl.pathname
+    .split('/')
+    .filter(Boolean)
+    .map(segment => decodeURIComponent(segment));
+
+  const fileName = pathSegments.at(-1);
+  if (!fileName) {
+    throw new Error('삭제할 파일명을 추출할 수 없습니다.');
+  }
+
+  if (pathSegments[0] === 'file' && pathSegments.length >= 3) {
+    return {
+      folder: pathSegments[1].toUpperCase(),
+      fileName: pathSegments.slice(2).join('/'),
+    };
+  }
+
+  if (!fallbackFolder) {
+    throw new Error('삭제할 파일 폴더를 확인할 수 없습니다.');
+  }
+
+  return {
+    folder: fallbackFolder,
+    fileName,
+  };
+};
+
 /**
  * 파일을 업로드하고 URL을 반환합니다
  * @param {File} file - 업로드할 파일
@@ -49,7 +109,7 @@ export const uploadFile = async (file, folder) => {
 
   // 백엔드는 snake_case로 응답하므로 file_url을 fileUrl로 변환
   return {
-    fileUrl: response.data.file_url
+    fileUrl: normalizeFileUrl(response.data.file_url)
   };
 };
 
@@ -63,6 +123,11 @@ export const deleteFile = async (folder, fileName) => {
     params: { folder, fileName },
   });
   return response.data;
+};
+
+export const deleteFileByUrl = async (fileUrl, fallbackFolder) => {
+  const { folder, fileName } = getFileDeleteParams(fileUrl, fallbackFolder);
+  return deleteFile(folder, fileName);
 };
 
 // 파일 폴더 상수
