@@ -23,16 +23,16 @@ describe('fileService URL helpers', () => {
     jest.clearAllMocks();
   });
 
-  it('normalizes relative public file paths to the canonical file domain', () => {
+  it('normalizes relative public file paths to the active API domain by default', () => {
     expect(normalizeFileUrl('/file/music_folder/test.mp3')).toBe(
-      'https://whispy.whispy-company.site/file/music_folder/test.mp3'
+      'https://whispy-stag.whispy-company.site/file/music_folder/test.mp3'
     );
   });
 
-  it('rewrites staging public file URLs to the canonical file domain', () => {
+  it('rewrites public file URLs to the active API domain by default', () => {
     expect(
-      normalizeFileUrl('https://whispy-stag.whispy-company.site/file/music_folder/test.mp3')
-    ).toBe('https://whispy.whispy-company.site/file/music_folder/test.mp3');
+      normalizeFileUrl('https://whispy.whispy-company.site/file/music_folder/test.mp3')
+    ).toBe('https://whispy-stag.whispy-company.site/file/music_folder/test.mp3');
   });
 
   it('keeps non-file absolute URLs unchanged', () => {
@@ -74,10 +74,10 @@ describe('fileService URL helpers', () => {
     });
   });
 
-  it('normalizes upload response file_url to the canonical file domain', async () => {
+  it('normalizes upload response file_url to the active API domain by default', async () => {
     api.post.mockResolvedValue({
       data: {
-        file_url: 'https://whispy-stag.whispy-company.site/file/profile_image_folder/test.webp',
+        file_url: 'https://whispy.whispy-company.site/file/profile_image_folder/test.webp',
       },
     });
 
@@ -87,7 +87,7 @@ describe('fileService URL helpers', () => {
     );
 
     expect(response).toEqual({
-      fileUrl: 'https://whispy.whispy-company.site/file/profile_image_folder/test.webp',
+      fileUrl: 'https://whispy-stag.whispy-company.site/file/profile_image_folder/test.webp',
     });
   });
 });

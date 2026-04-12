@@ -1,8 +1,6 @@
 import api from './api';
 import heic2any from 'heic2any';
 
-const DEFAULT_FILE_BASE_URL = 'https://whispy.whispy-company.site';
-
 const getApiBaseUrl = () => {
   if (process.env.REACT_APP_API_BASE_URL) {
     return process.env.REACT_APP_API_BASE_URL;
@@ -16,7 +14,7 @@ const getApiBaseUrl = () => {
 };
 
 const getFileBaseUrl = () => {
-  return process.env.REACT_APP_FILE_BASE_URL || DEFAULT_FILE_BASE_URL;
+  return process.env.REACT_APP_FILE_BASE_URL || getApiBaseUrl();
 };
 
 const isPublicFilePath = (pathname) => {
