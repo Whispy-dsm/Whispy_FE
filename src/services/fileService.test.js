@@ -1,4 +1,4 @@
-process.env.REACT_APP_API_BASE_URL = 'https://whispy.whispy-company.site';
+process.env.REACT_APP_API_BASE_URL = 'https://whispy-stag.whispy-company.site';
 
 jest.mock('./api', () => ({
   __esModule: true,
@@ -11,26 +11,37 @@ jest.mock('./api', () => ({
 jest.mock('heic2any', () => jest.fn());
 
 import api from './api';
-import { deleteFileByUrl, getFileDeleteParams, normalizeFileUrl } from './fileService';
+import {
+  deleteFileByUrl,
+  getFileDeleteParams,
+  normalizeFileUrl,
+  uploadFile,
+} from './fileService';
 
 describe('fileService URL helpers', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('relative 공개 파일 경로를 API 기준 절대 URL로 바꾼다', () => {
+  it('normalizes relative public file paths to the canonical file domain', () => {
     expect(normalizeFileUrl('/file/music_folder/test.mp3')).toBe(
       'https://whispy.whispy-company.site/file/music_folder/test.mp3'
     );
   });
 
-  it('이미 절대 URL이면 그대로 유지한다', () => {
+  it('rewrites staging public file URLs to the canonical file domain', () => {
+    expect(
+      normalizeFileUrl('https://whispy-stag.whispy-company.site/file/music_folder/test.mp3')
+    ).toBe('https://whispy.whispy-company.site/file/music_folder/test.mp3');
+  });
+
+  it('keeps non-file absolute URLs unchanged', () => {
     expect(normalizeFileUrl('https://cdn.example.com/file.webp')).toBe(
       'https://cdn.example.com/file.webp'
     );
   });
 
-  it('공개 파일 URL에서 folder와 fileName을 추출한다', () => {
+  it('extracts delete params from a public file URL', () => {
     expect(
       getFileDeleteParams(
         'https://whispy.whispy-company.site/file/music_banner_image_folder/test-banner.webp?cache=1'
@@ -41,14 +52,14 @@ describe('fileService URL helpers', () => {
     });
   });
 
-  it('legacy 경로는 fallback folder로 삭제 파라미터를 만든다', () => {
+  it('uses the fallback folder for legacy paths', () => {
     expect(getFileDeleteParams('/legacy/test.mp3', 'MUSIC_FOLDER')).toEqual({
       folder: 'MUSIC_FOLDER',
       fileName: 'test.mp3',
     });
   });
 
-  it('deleteFileByUrl이 추출한 파라미터로 삭제 API를 호출한다', async () => {
+  it('calls delete API with params extracted from the public file URL', async () => {
     api.delete.mockResolvedValue({ data: undefined });
 
     await deleteFileByUrl(
@@ -60,6 +71,23 @@ describe('fileService URL helpers', () => {
         folder: 'MUSIC_VIDEO_FOLDER',
         fileName: 'test-video.mp4',
       },
+    });
+  });
+
+  it('normalizes upload response file_url to the canonical file domain', async () => {
+    api.post.mockResolvedValue({
+      data: {
+        file_url: 'https://whispy-stag.whispy-company.site/file/profile_image_folder/test.webp',
+      },
+    });
+
+    const response = await uploadFile(
+      new File(['image'], 'test.webp', { type: 'image/webp' }),
+      'PROFILE_IMAGE_FOLDER'
+    );
+
+    expect(response).toEqual({
+      fileUrl: 'https://whispy.whispy-company.site/file/profile_image_folder/test.webp',
     });
   });
 });

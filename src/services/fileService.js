@@ -1,6 +1,8 @@
 import api from './api';
 import heic2any from 'heic2any';
 
+const DEFAULT_FILE_BASE_URL = 'https://whispy.whispy-company.site';
+
 const getApiBaseUrl = () => {
   if (process.env.REACT_APP_API_BASE_URL) {
     return process.env.REACT_APP_API_BASE_URL;
@@ -11,6 +13,14 @@ const getApiBaseUrl = () => {
   }
 
   return '';
+};
+
+const getFileBaseUrl = () => {
+  return process.env.REACT_APP_FILE_BASE_URL || DEFAULT_FILE_BASE_URL;
+};
+
+const isPublicFilePath = (pathname) => {
+  return pathname === '/file' || pathname.startsWith('/file/');
 };
 
 /**
@@ -45,15 +55,19 @@ export const normalizeFileUrl = (fileUrl) => {
   }
 
   if (/^https?:\/\//i.test(fileUrl)) {
-    return fileUrl;
-  }
-
-  const baseUrl = getApiBaseUrl();
-  if (!baseUrl) {
+    const parsedUrl = new URL(fileUrl);
+    if (isPublicFilePath(parsedUrl.pathname)) {
+      return new URL(parsedUrl.pathname + parsedUrl.search + parsedUrl.hash, getFileBaseUrl()).toString();
+    }
     return fileUrl;
   }
 
   const normalizedPath = fileUrl.startsWith('/') ? fileUrl : `/${fileUrl}`;
+  const baseUrl = isPublicFilePath(normalizedPath) ? getFileBaseUrl() : getApiBaseUrl();
+  if (!baseUrl) {
+    return fileUrl;
+  }
+
   return new URL(normalizedPath, baseUrl).toString();
 };
 
